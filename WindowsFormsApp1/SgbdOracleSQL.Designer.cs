@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApp1
 {
-    partial class Form1
+    partial class SgbdOracleSQL
     {
         /// <summary>
         /// Required designer variable.
@@ -28,36 +28,57 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.treeViewBD = new System.Windows.Forms.TreeView();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
+            // treeViewBD
+            // 
+            this.treeViewBD.Location = new System.Drawing.Point(12, 12);
+            this.treeViewBD.Name = "treeViewBD";
+            this.treeViewBD.Size = new System.Drawing.Size(146, 426);
+            this.treeViewBD.TabIndex = 0;
+            // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(95, 80);
+            this.textBox1.Location = new System.Drawing.Point(183, 12);
+            this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(85, 20);
-            this.textBox1.TabIndex = 0;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            this.textBox1.Size = new System.Drawing.Size(605, 362);
+            this.textBox1.TabIndex = 1;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(183, 392);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 2;
+            this.button1.Text = "Compilar";
+            this.button1.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(39, 50);
+            this.label1.Location = new System.Drawing.Point(264, 397);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "label1";
+            this.label1.Size = new System.Drawing.Size(92, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Aun NO Funciona";
             // 
-            // Form1
+            // SgbdOracleSQL
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(316, 450);
+            this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.label1);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Controls.Add(this.treeViewBD);
+            this.Name = "SgbdOracleSQL";
+            this.Text = "SgbdOracleSQL";
+            this.Load += new System.EventHandler(this.SgbdOracleSQL_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -65,8 +86,9 @@
 
         #endregion
 
+        private System.Windows.Forms.TreeView treeViewBD;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label1;
     }
 }
-

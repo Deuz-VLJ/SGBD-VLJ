@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ConexionesSGBD">
+      <HintPath>..\ConexionesSGBD\bin\Debug\ConexionesSGBD.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,16 +49,49 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="InicioSesion.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="InicioSesion.Designer.cs">
+      <DependentUpon>InicioSesion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SgbdFirebird.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SgbdFirebird.Designer.cs">
+      <DependentUpon>SgbdFirebird.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="SgbdMySQL.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SgbdMySQL.Designer.cs">
+      <DependentUpon>SgbdMySQL.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SgbdOracleSQL.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SgbdOracleSQL.Designer.cs">
+      <DependentUpon>SgbdOracleSQL.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SgbdPostgresSQL.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SgbdPostgresSQL.Designer.cs">
+      <DependentUpon>SgbdPostgresSQL.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SgbdSQLServer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SgbdSQLServer.Designer.cs">
+      <DependentUpon>SgbdSQLServer.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="InicioSesion.resx">
+      <DependentUpon>InicioSesion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SgbdFirebird.resx">
+      <DependentUpon>SgbdFirebird.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -66,6 +102,18 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="SgbdMySQL.resx">
+      <DependentUpon>SgbdMySQL.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SgbdOracleSQL.resx">
+      <DependentUpon>SgbdOracleSQL.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SgbdPostgresSQL.resx">
+      <DependentUpon>SgbdPostgresSQL.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SgbdSQLServer.resx">
+      <DependentUpon>SgbdSQLServer.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
