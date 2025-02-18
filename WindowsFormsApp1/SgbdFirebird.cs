@@ -14,7 +14,7 @@ namespace WindowsFormsApp1
 {
     public partial class SgbdFirebird : Form
     {
-        private ConexionFirebird conexionFirebird;
+       private ConexionFirebird conexionFirebird;
         public SgbdFirebird(ConexionFirebird conexion)
         {
             InitializeComponent();

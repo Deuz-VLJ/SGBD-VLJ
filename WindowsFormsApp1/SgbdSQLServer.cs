@@ -31,14 +31,21 @@ namespace WindowsFormsApp1
             treeViewBD.Nodes.Clear();
 
             TreeNode rootNode = new TreeNode("BASE DE DATOS SQLSERVER");
+            TreeNode basesDeDatosNode = new TreeNode("Bases de Datos");
 
-            AgregarNodo(rootNode, "Tablas", conexionSQL.ObtenerTablas());
-            AgregarNodo(rootNode, "Vistas", conexionSQL.ObtenerVistas());
-            AgregarNodo(rootNode, "Procedimientos", conexionSQL.ObtenerProcedimientos());
-            AgregarNodo(rootNode, "Funciones", conexionSQL.ObtenerFunciones());
-            AgregarNodo(rootNode, "Triggers", conexionSQL.ObtenerTriggers());
-            AgregarNodo(rootNode, "Tipos de Datos", conexionSQL.ObtenerTiposDeDatos());
+            foreach (var bd in conexionSQL.ObtenerBasesDeDatos())
+            {
+                TreeNode bdNode = new TreeNode(bd);
+                AgregarNodo(bdNode, "Tablas", conexionSQL.ObtenerTablas(bd));
+                AgregarNodo(bdNode, "Vistas", conexionSQL.ObtenerVistas(bd));
+                AgregarNodo(bdNode, "Procedimientos", conexionSQL.ObtenerProcedimientos(bd));
+                AgregarNodo(bdNode, "Funciones", conexionSQL.ObtenerFunciones(bd));
+                AgregarNodo(bdNode, "Triggers", conexionSQL.ObtenerTriggers(bd));
+                AgregarNodo(bdNode, "Tipos de Datos", conexionSQL.ObtenerTiposDeDatos(bd));
+                basesDeDatosNode.Nodes.Add(bdNode);
+            }
 
+            rootNode.Nodes.Add(basesDeDatosNode);
             treeViewBD.Nodes.Add(rootNode);
             treeViewBD.ExpandAll();
         }

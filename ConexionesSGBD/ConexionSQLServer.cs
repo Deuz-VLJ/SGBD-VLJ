@@ -77,35 +77,41 @@ namespace ConexionesSGBD
         }
 
         // Obtener listas de objetos de la base de datos
-        public List<string> ObtenerTablas()
-        {
-            return EjecutarConsulta("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';");
-        }
+    public List<string> ObtenerTablas(string baseDatos)
+    {
+        return EjecutarConsulta($"USE {baseDatos}; SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';");
+    }
 
-        public List<string> ObtenerVistas()
-        {
-            return EjecutarConsulta("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS;");
-        }
+    public List<string> ObtenerVistas(string baseDatos)
+    {
+        return EjecutarConsulta($"USE {baseDatos}; SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS;");
+    }
 
-        public List<string> ObtenerProcedimientos()
-        {
-            return EjecutarConsulta("SELECT name FROM sys.procedures;");
-        }
+    public List<string> ObtenerProcedimientos(string baseDatos)
+    {
+        return EjecutarConsulta($"USE {baseDatos}; SELECT name FROM sys.procedures;");
+    }
 
-        public List<string> ObtenerFunciones()
-        {
-            return EjecutarConsulta("SELECT name FROM sys.objects WHERE type IN ('FN', 'TF');");
-        }
+    public List<string> ObtenerFunciones(string baseDatos)
+    {
+        return EjecutarConsulta($"USE {baseDatos}; SELECT name FROM sys.objects WHERE type IN ('FN', 'TF');");
+    }
 
-        public List<string> ObtenerTriggers()
-        {
-            return EjecutarConsulta("SELECT name FROM sys.triggers;");
-        }
+    public List<string> ObtenerTriggers(string baseDatos)
+    {
+        return EjecutarConsulta($"USE {baseDatos}; SELECT name FROM sys.triggers;");
+    }
 
-        public List<string> ObtenerTiposDeDatos()
-        {
-            return EjecutarConsulta("SELECT name FROM sys.types;");
-        }
+    public List<string> ObtenerTiposDeDatos(string baseDatos)
+    {
+        return EjecutarConsulta($"USE {baseDatos}; SELECT name FROM sys.types;");
+    }
+    
+    // Obtener bases de datos en el servidor
+    public List<string> ObtenerBasesDeDatos()
+    {
+        return EjecutarConsulta("SELECT name FROM sys.databases;");
+    }
 
     }
 }

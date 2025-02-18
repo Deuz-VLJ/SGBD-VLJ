@@ -71,34 +71,39 @@ namespace ConexionesSGBD
             return resultados;
         }
 
-        public List<string> ObtenerTablas()
+        public List<string> ObtenerBasesDeDatos()
         {
-            return EjecutarConsulta("SHOW TABLES;");
+            return EjecutarConsulta("SHOW DATABASES;");
         }
 
-        public List<string> ObtenerVistas()
+        public List<string> ObtenerTablas(string baseDatos)
         {
-            return EjecutarConsulta("SELECT TABLE_NAME FROM information_schema.VIEWS WHERE TABLE_SCHEMA = DATABASE();");
+            return EjecutarConsulta($"SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{baseDatos}';");
         }
 
-        public List<string> ObtenerProcedimientos()
+        public List<string> ObtenerVistas(string baseDatos)
         {
-            return EjecutarConsulta("SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_SCHEMA = DATABASE();");
+            return EjecutarConsulta($"SELECT TABLE_NAME FROM information_schema.VIEWS WHERE TABLE_SCHEMA = '{baseDatos}';");
         }
 
-        public List<string> ObtenerFunciones()
+        public List<string> ObtenerProcedimientos(string baseDatos)
         {
-            return EjecutarConsulta("SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='FUNCTION' AND ROUTINE_SCHEMA = DATABASE();");
+            return EjecutarConsulta($"SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_SCHEMA = '{baseDatos}';");
         }
 
-        public List<string> ObtenerTriggers()
+        public List<string> ObtenerFunciones(string baseDatos)
         {
-            return EjecutarConsulta("SELECT TRIGGER_NAME FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = DATABASE();");
+            return EjecutarConsulta($"SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='FUNCTION' AND ROUTINE_SCHEMA = '{baseDatos}';");
         }
 
-        public List<string> ObtenerTiposDeDatos()
+        public List<string> ObtenerTriggers(string baseDatos)
         {
-            return EjecutarConsulta("SELECT DISTINCT DATA_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE();");
+            return EjecutarConsulta($"SELECT TRIGGER_NAME FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = '{baseDatos}';");
+        }
+
+        public List<string> ObtenerTiposDeDatos(string baseDatos)
+        {
+            return EjecutarConsulta($"SELECT DISTINCT DATA_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '{baseDatos}';");
         }
     }
 }

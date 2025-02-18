@@ -15,6 +15,7 @@ namespace WindowsFormsApp1
     public partial class SgbdPostgresSQL : Form
     {
         private ConexionPostgresSQL conexionPostgres;
+
         public SgbdPostgresSQL(ConexionPostgresSQL conexion)
         {
             InitializeComponent();
@@ -25,19 +26,27 @@ namespace WindowsFormsApp1
         {
             LlenarTreeView();
         }
+
         private void LlenarTreeView()
         {
             treeViewBD.Nodes.Clear();
 
             TreeNode rootNode = new TreeNode("BASE DE DATOS PostgreSQL");
+            TreeNode basesDeDatosNode = new TreeNode("Bases de Datos");
 
-            AgregarNodo(rootNode, "Tablas", conexionPostgres.ObtenerTablas());
-            AgregarNodo(rootNode, "Vistas", conexionPostgres.ObtenerVistas());
-            AgregarNodo(rootNode, "Procedimientos", conexionPostgres.ObtenerProcedimientos());
-            AgregarNodo(rootNode, "Funciones", conexionPostgres.ObtenerFunciones());
-            AgregarNodo(rootNode, "Triggers", conexionPostgres.ObtenerTriggers());
-            AgregarNodo(rootNode, "Tipos de Datos", conexionPostgres.ObtenerTiposDeDatos());
+            foreach (var bd in conexionPostgres.ObtenerBasesDeDatos())
+            {
+                TreeNode bdNode = new TreeNode(bd);
+                AgregarNodo(bdNode, "Tablas", conexionPostgres.ObtenerTablas(bd));
+                AgregarNodo(bdNode, "Vistas", conexionPostgres.ObtenerVistas(bd));
+                AgregarNodo(bdNode, "Procedimientos", conexionPostgres.ObtenerProcedimientos(bd));
+                AgregarNodo(bdNode, "Funciones", conexionPostgres.ObtenerFunciones(bd));
+                AgregarNodo(bdNode, "Triggers", conexionPostgres.ObtenerTriggers(bd));
+                AgregarNodo(bdNode, "Tipos de Datos", conexionPostgres.ObtenerTiposDeDatos(bd));
+                basesDeDatosNode.Nodes.Add(bdNode);
+            }
 
+            rootNode.Nodes.Add(basesDeDatosNode);
             treeViewBD.Nodes.Add(rootNode);
             treeViewBD.ExpandAll();
         }

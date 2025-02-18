@@ -75,10 +75,10 @@ namespace WindowsFormsApp1
             }
             if (checkBox4.Checked == true)
             {
-                ConexionPostgresSQL conexion = new ConexionPostgresSQL(servidor, rutaBD, usuario, contraseña);
+                ConexionPostgresSQL conexion = new ConexionPostgresSQL(servidor, usuario, contraseña);
                 if (conexion.ProbarConexion())
                 {
-                    MessageBox.Show("✅ Conexión exitosa a MySQL.");
+                    MessageBox.Show("✅ Conexión exitosa a PosgreSQL.");
                     SgbdPostgresSQL form5 = new SgbdPostgresSQL(conexion);
                     form5.Show();
                     this.Hide();
@@ -93,7 +93,7 @@ namespace WindowsFormsApp1
                 ConexionOracleSQL conexion = new ConexionOracleSQL(servidor, rutaBD, usuario, contraseña);
                 if (conexion.ProbarConexion())
                 {
-                    MessageBox.Show("✅ Conexión exitosa a MySQL.");
+                    MessageBox.Show("✅ Conexión exitosa a ORACLESQL.");
                     SgbdOracleSQL form5 = new SgbdOracleSQL(conexion);
                     form5.Show();
                     this.Hide();

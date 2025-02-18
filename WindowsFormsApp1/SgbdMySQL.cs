@@ -15,6 +15,7 @@ namespace WindowsFormsApp1
     public partial class SgbdMySQL : Form
     {
         private ConexionMySQL conexionMySQL;
+
         public SgbdMySQL(ConexionMySQL conexion)
         {
             InitializeComponent();
@@ -31,14 +32,21 @@ namespace WindowsFormsApp1
             treeViewBD.Nodes.Clear();
 
             TreeNode rootNode = new TreeNode("BASE DE DATOS MySQL");
+            TreeNode basesDeDatosNode = new TreeNode("Bases de Datos");
 
-            AgregarNodo(rootNode, "Tablas", conexionMySQL.ObtenerTablas());
-            AgregarNodo(rootNode, "Vistas", conexionMySQL.ObtenerVistas());
-            AgregarNodo(rootNode, "Procedimientos", conexionMySQL.ObtenerProcedimientos());
-            AgregarNodo(rootNode, "Funciones", conexionMySQL.ObtenerFunciones());
-            AgregarNodo(rootNode, "Triggers", conexionMySQL.ObtenerTriggers());
-            AgregarNodo(rootNode, "Tipos de Datos", conexionMySQL.ObtenerTiposDeDatos());
+            foreach (var bd in conexionMySQL.ObtenerBasesDeDatos())
+            {
+                TreeNode bdNode = new TreeNode(bd);
+                AgregarNodo(bdNode, "Tablas", conexionMySQL.ObtenerTablas(bd));
+                AgregarNodo(bdNode, "Vistas", conexionMySQL.ObtenerVistas(bd));
+                AgregarNodo(bdNode, "Procedimientos", conexionMySQL.ObtenerProcedimientos(bd));
+                AgregarNodo(bdNode, "Funciones", conexionMySQL.ObtenerFunciones(bd));
+                AgregarNodo(bdNode, "Triggers", conexionMySQL.ObtenerTriggers(bd));
+                AgregarNodo(bdNode, "Tipos de Datos", conexionMySQL.ObtenerTiposDeDatos(bd));
+                basesDeDatosNode.Nodes.Add(bdNode);
+            }
 
+            rootNode.Nodes.Add(basesDeDatosNode);
             treeViewBD.Nodes.Add(rootNode);
             treeViewBD.ExpandAll();
         }
