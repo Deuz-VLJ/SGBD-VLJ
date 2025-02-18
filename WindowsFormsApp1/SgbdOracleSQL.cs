@@ -30,7 +30,7 @@ namespace WindowsFormsApp1
         {
             treeViewBD.Nodes.Clear();
 
-            TreeNode rootNode = new TreeNode("GESTIONPRODUCTOS");
+            TreeNode rootNode = new TreeNode("BaseDatosOracle");
 
             AgregarNodo(rootNode, "Tablas", conexionOracle.ObtenerTablas());
             AgregarNodo(rootNode, "Vistas", conexionOracle.ObtenerVistas());

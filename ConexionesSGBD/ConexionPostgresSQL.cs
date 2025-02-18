@@ -14,7 +14,7 @@ namespace ConexionesSGBD
 
         public ConexionPostgresSQL(string servidor, string baseDatos, string usuario, string contraseña)
         {
-            string cadenaConexion = $"Host={servidor};Database={baseDatos};Username={usuario};Password={contraseña};Port=5432;";
+            string cadenaConexion = $"host={servidor};Database={baseDatos};Username={usuario};Password={contraseña};Port=5432;";
             conexion = new NpgsqlConnection(cadenaConexion);
         }
 
