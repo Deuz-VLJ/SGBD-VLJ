@@ -29,7 +29,7 @@ namespace WindowsFormsApp1
         {
             treeViewBD.Nodes.Clear();
 
-            TreeNode rootNode = new TreeNode("GESTIONPRODUCTOS");
+            TreeNode rootNode = new TreeNode("BASE DE DATOS PostgreSQL");
 
             AgregarNodo(rootNode, "Tablas", conexionPostgres.ObtenerTablas());
             AgregarNodo(rootNode, "Vistas", conexionPostgres.ObtenerVistas());

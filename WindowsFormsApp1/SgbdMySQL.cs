@@ -30,7 +30,7 @@ namespace WindowsFormsApp1
         {
             treeViewBD.Nodes.Clear();
 
-            TreeNode rootNode = new TreeNode("GESTIONPRODUCTOS");
+            TreeNode rootNode = new TreeNode("BASE DE DATOS MySQL");
 
             AgregarNodo(rootNode, "Tablas", conexionMySQL.ObtenerTablas());
             AgregarNodo(rootNode, "Vistas", conexionMySQL.ObtenerVistas());

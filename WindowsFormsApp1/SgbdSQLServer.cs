@@ -30,7 +30,7 @@ namespace WindowsFormsApp1
         {
             treeViewBD.Nodes.Clear();
 
-            TreeNode rootNode = new TreeNode("ServidorSQLSERVER");
+            TreeNode rootNode = new TreeNode("BASE DE DATOS SQLSERVER");
 
             AgregarNodo(rootNode, "Tablas", conexionSQL.ObtenerTablas());
             AgregarNodo(rootNode, "Vistas", conexionSQL.ObtenerVistas());

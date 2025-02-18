@@ -30,7 +30,7 @@ namespace WindowsFormsApp1
         {
             treeViewBD.Nodes.Clear();
 
-            TreeNode rootNode = new TreeNode("BASE DE DATOS PRUEBA.GDB");
+            TreeNode rootNode = new TreeNode("BASE DE DATOS Firebirt");
 
             AgregarNodo(rootNode, "Tablas", conexionFirebird.ObtenerTablas());
             AgregarNodo(rootNode, "Views", conexionFirebird.ObtenerVistas());
