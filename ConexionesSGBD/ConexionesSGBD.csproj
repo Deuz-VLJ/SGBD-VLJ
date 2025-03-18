@@ -151,6 +151,7 @@
     <Compile Include="ConexionOracleSQL.cs" />
     <Compile Include="ConexionPostgresSQL.cs" />
     <Compile Include="ConexionSQLServer.cs" />
+    <Compile Include="IBaseDatos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

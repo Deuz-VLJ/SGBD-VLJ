@@ -36,13 +36,13 @@ namespace WindowsFormsApp1
             foreach (var bd in conexionSQL.ObtenerBasesDeDatos())
             {
                 TreeNode bdNode = new TreeNode(bd);
-                AgregarNodo(bdNode, "Tablas", conexionSQL.ObtenerTablas(bd));
-                AgregarNodo(bdNode, "Vistas", conexionSQL.ObtenerVistas(bd));
-                AgregarNodo(bdNode, "Procedimientos", conexionSQL.ObtenerProcedimientos(bd));
-                AgregarNodo(bdNode, "Funciones", conexionSQL.ObtenerFunciones(bd));
-                AgregarNodo(bdNode, "Triggers", conexionSQL.ObtenerTriggers(bd));
-                AgregarNodo(bdNode, "Tipos de Datos", conexionSQL.ObtenerTiposDeDatos(bd));
-                basesDeDatosNode.Nodes.Add(bdNode);
+                //AgregarNodo(bdNode, "Tablas", conexionSQL.ObtenerTablas(bd));
+                //AgregarNodo(bdNode, "Vistas", conexionSQL.ObtenerVistas(bd));
+                //AgregarNodo(bdNode, "Procedimientos", conexionSQL.ObtenerProcedimientos(bd));
+                //AgregarNodo(bdNode, "Funciones", conexionSQL.ObtenerFunciones(bd));
+                //AgregarNodo(bdNode, "Triggers", conexionSQL.ObtenerTriggers(bd));
+                //AgregarNodo(bdNode, "Tipos de Datos", conexionSQL.ObtenerTiposDeDatos(bd));
+                //basesDeDatosNode.Nodes.Add(bdNode);
             }
 
             rootNode.Nodes.Add(basesDeDatosNode);

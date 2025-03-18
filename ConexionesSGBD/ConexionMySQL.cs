@@ -8,13 +8,13 @@ using MySql.Data.MySqlClient;
 
 namespace ConexionesSGBD
 {
-    public class ConexionMySQL
+    public class ConexionMySQL : IBaseDatos
     {
         private readonly MySqlConnection conexion;
 
-        public ConexionMySQL(string servidor, string baseDatos, string usuario, string contraseña)
+        public ConexionMySQL(string servidor, string usuario, string contraseña)
         {
-            string cadenaConexion = $"Server={servidor};Database={baseDatos};User Id={usuario};Password={contraseña};";
+            string cadenaConexion = $"Server={servidor};Database=mysql;User={usuario};Password={contraseña};";
             conexion = new MySqlConnection(cadenaConexion);
         }
 
@@ -47,7 +47,7 @@ namespace ConexionesSGBD
             }
         }
 
-        private List<string> EjecutarConsulta(string consulta)
+        public List<string> EjecutarConsulta(string consulta)
         {
             List<string> resultados = new List<string>();
 
@@ -71,39 +71,83 @@ namespace ConexionesSGBD
             return resultados;
         }
 
+        public Dictionary<string, string> ObtenerAtributos(string tabla)
+        {
+            Dictionary<string, string> atributos = new Dictionary<string, string>();
+            string consulta = $"DESCRIBE {tabla};";
+
+            using ( conexion )
+            {
+                conexion.Open();
+                using (MySqlCommand comando = new MySqlCommand(consulta, conexion))
+                using (MySqlDataReader lector = comando.ExecuteReader())
+                {
+                    while (lector.Read())
+                    {
+                        atributos[lector["Field"].ToString()] = lector["Type"].ToString();
+                    }
+                }
+            }
+            return atributos;
+        }
+
+        public List<string> ObtenerTablas()
+        {
+            List<string> tablas = new List<string>();
+            string consulta = "SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';";
+
+            using (MySqlCommand comando = new MySqlCommand(consulta, conexion))
+            using (MySqlDataReader lector = comando.ExecuteReader())
+            {
+                while (lector.Read())
+                {
+                    string baseDatos = lector["TABLE_SCHEMA"].ToString();
+                    string nombreTabla = lector["TABLE_NAME"].ToString();
+                    tablas.Add($"{baseDatos}.{nombreTabla}");
+                }
+            }
+
+            return tablas;
+        }
+
+
         public List<string> ObtenerBasesDeDatos()
         {
             return EjecutarConsulta("SHOW DATABASES;");
         }
 
-        public List<string> ObtenerTablas(string baseDatos)
+        public List<string> ObtenerVistas()
         {
-            return EjecutarConsulta($"SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{baseDatos}';");
+            return EjecutarConsulta("SELECT TABLE_NAME FROM information_schema.VIEWS WHERE TABLE_SCHEMA = DATABASE();");
         }
 
-        public List<string> ObtenerVistas(string baseDatos)
+        public List<string> ObtenerProcedimientos()
         {
-            return EjecutarConsulta($"SELECT TABLE_NAME FROM information_schema.VIEWS WHERE TABLE_SCHEMA = '{baseDatos}';");
+            return EjecutarConsulta("SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_SCHEMA = DATABASE();");
         }
 
-        public List<string> ObtenerProcedimientos(string baseDatos)
+        public List<string> ObtenerFunciones()
         {
-            return EjecutarConsulta($"SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_SCHEMA = '{baseDatos}';");
+            return EjecutarConsulta("SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='FUNCTION' AND ROUTINE_SCHEMA = DATABASE();");
         }
 
-        public List<string> ObtenerFunciones(string baseDatos)
+        public List<string> ObtenerTriggers()
         {
-            return EjecutarConsulta($"SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='FUNCTION' AND ROUTINE_SCHEMA = '{baseDatos}';");
+            return EjecutarConsulta("SELECT TRIGGER_NAME FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = DATABASE();");
         }
 
-        public List<string> ObtenerTriggers(string baseDatos)
+        public List<string> ObtenerTiposDeDatos()
         {
-            return EjecutarConsulta($"SELECT TRIGGER_NAME FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = '{baseDatos}';");
+            return EjecutarConsulta("SELECT DISTINCT DATA_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE();");
+        }
+        public List<string> ObtenerIndices()
+        {
+            return EjecutarConsulta("SELECT DISTINCT INDEX_NAME FROM information_schema.statistics WHERE TABLE_SCHEMA = DATABASE();");
         }
 
-        public List<string> ObtenerTiposDeDatos(string baseDatos)
+        public List<string> ObtenerSecuencias()
         {
-            return EjecutarConsulta($"SELECT DISTINCT DATA_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '{baseDatos}';");
+            return new List<string>(); // 🔹 MySQL no usa secuencias, utiliza AUTO_INCREMENT en su lugar.
         }
     }
 }

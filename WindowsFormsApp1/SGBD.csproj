@@ -155,6 +155,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SgbdMultiBaseDatos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SgbdMultiBaseDatos.Designer.cs">
+      <DependentUpon>SgbdMultiBaseDatos.cs</DependentUpon>
+    </Compile>
     <Compile Include="SgbdMySQL.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -194,6 +200,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="SgbdMultiBaseDatos.resx">
+      <DependentUpon>SgbdMultiBaseDatos.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SgbdMySQL.resx">
       <DependentUpon>SgbdMySQL.cs</DependentUpon>
     </EmbeddedResource>

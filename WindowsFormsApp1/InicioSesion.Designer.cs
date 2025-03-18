@@ -2,15 +2,23 @@
 {
     partial class Form1
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox txtServidor;
+        private System.Windows.Forms.TextBox txtRutaBD;
+        private System.Windows.Forms.TextBox txtUsuario;
+        private System.Windows.Forms.TextBox txtContrasena;
+        private System.Windows.Forms.CheckBox chkFirebird;
+        private System.Windows.Forms.CheckBox chkSqlServer;
+        private System.Windows.Forms.CheckBox chkMySQL;
+        private System.Windows.Forms.CheckBox chkPostgreSQL;
+        private System.Windows.Forms.CheckBox chkOracle;
+        private System.Windows.Forms.Button btnConectar;
+        private System.Windows.Forms.Button btnCancelar;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -20,202 +28,168 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            this.txtServidor = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.txtRuta = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.txtUsuario = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.txtPassword = new System.Windows.Forms.TextBox();
-            this.BttConexionFB = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
-            this.checkBox5 = new System.Windows.Forms.CheckBox();
+            this.txtServidor = new System.Windows.Forms.TextBox();
+            this.txtRutaBD = new System.Windows.Forms.TextBox();
+            this.txtUsuario = new System.Windows.Forms.TextBox();
+            this.txtContrasena = new System.Windows.Forms.TextBox();
+            this.chkFirebird = new System.Windows.Forms.CheckBox();
+            this.chkSqlServer = new System.Windows.Forms.CheckBox();
+            this.chkMySQL = new System.Windows.Forms.CheckBox();
+            this.chkPostgreSQL = new System.Windows.Forms.CheckBox();
+            this.chkOracle = new System.Windows.Forms.CheckBox();
+            this.btnConectar = new System.Windows.Forms.Button();
+            this.btnCancelar = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
-            // txtServidor
-            // 
-            this.txtServidor.Location = new System.Drawing.Point(53, 77);
-            this.txtServidor.Name = "txtServidor";
-            this.txtServidor.Size = new System.Drawing.Size(105, 20);
-            this.txtServidor.TabIndex = 0;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 52);
+            this.label1.Location = new System.Drawing.Point(20, 20);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(108, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Servidor(IP-direccion)";
+            this.label1.Size = new System.Drawing.Size(100, 23);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Servidor (IP o Nombre):";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 117);
+            this.label2.Location = new System.Drawing.Point(20, 60);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(45, 13);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "RutaBD";
-            // 
-            // txtRuta
-            // 
-            this.txtRuta.Location = new System.Drawing.Point(53, 142);
-            this.txtRuta.Name = "txtRuta";
-            this.txtRuta.Size = new System.Drawing.Size(105, 20);
-            this.txtRuta.TabIndex = 2;
+            this.label2.Size = new System.Drawing.Size(100, 23);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Ruta BD:";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 178);
+            this.label3.Location = new System.Drawing.Point(20, 100);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(46, 13);
-            this.label3.TabIndex = 5;
+            this.label3.Size = new System.Drawing.Size(100, 23);
+            this.label3.TabIndex = 4;
             this.label3.Text = "Usuario:";
-            // 
-            // txtUsuario
-            // 
-            this.txtUsuario.Location = new System.Drawing.Point(53, 203);
-            this.txtUsuario.Name = "txtUsuario";
-            this.txtUsuario.Size = new System.Drawing.Size(105, 20);
-            this.txtUsuario.TabIndex = 4;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 243);
+            this.label4.Location = new System.Drawing.Point(20, 140);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(61, 13);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "Contrasena";
+            this.label4.Size = new System.Drawing.Size(100, 23);
+            this.label4.TabIndex = 6;
+            this.label4.Text = "Contraseña:";
             // 
-            // txtPassword
+            // txtServidor
             // 
-            this.txtPassword.Location = new System.Drawing.Point(53, 268);
-            this.txtPassword.Name = "txtPassword";
-            this.txtPassword.Size = new System.Drawing.Size(105, 20);
-            this.txtPassword.TabIndex = 6;
+            this.txtServidor.Location = new System.Drawing.Point(160, 20);
+            this.txtServidor.Name = "txtServidor";
+            this.txtServidor.Size = new System.Drawing.Size(100, 20);
+            this.txtServidor.TabIndex = 1;
             // 
-            // BttConexionFB
+            // txtRutaBD
             // 
-            this.BttConexionFB.Location = new System.Drawing.Point(67, 340);
-            this.BttConexionFB.Name = "BttConexionFB";
-            this.BttConexionFB.Size = new System.Drawing.Size(91, 30);
-            this.BttConexionFB.TabIndex = 8;
-            this.BttConexionFB.Text = "Inicar Conexion";
-            this.BttConexionFB.UseVisualStyleBackColor = true;
-            this.BttConexionFB.Click += new System.EventHandler(this.BttConexionFB_Click);
+            this.txtRutaBD.Location = new System.Drawing.Point(160, 60);
+            this.txtRutaBD.Name = "txtRutaBD";
+            this.txtRutaBD.Size = new System.Drawing.Size(100, 20);
+            this.txtRutaBD.TabIndex = 3;
             // 
-            // checkBox1
+            // txtUsuario
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(201, 48);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(61, 17);
-            this.checkBox1.TabIndex = 9;
-            this.checkBox1.Text = "FireBird";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.txtUsuario.Location = new System.Drawing.Point(160, 100);
+            this.txtUsuario.Name = "txtUsuario";
+            this.txtUsuario.Size = new System.Drawing.Size(100, 20);
+            this.txtUsuario.TabIndex = 5;
             // 
-            // checkBox2
+            // txtContrasena
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(201, 80);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(72, 17);
-            this.checkBox2.TabIndex = 10;
-            this.checkBox2.Text = "SqlServer";
-            this.checkBox2.UseVisualStyleBackColor = true;
-            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
+            this.txtContrasena.Location = new System.Drawing.Point(160, 140);
+            this.txtContrasena.Name = "txtContrasena";
+            this.txtContrasena.Size = new System.Drawing.Size(100, 20);
+            this.txtContrasena.TabIndex = 7;
             // 
-            // checkBox3
+            // chkFirebird
             // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(201, 113);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(55, 17);
-            this.checkBox3.TabIndex = 12;
-            this.checkBox3.Text = "MySql";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
+            this.chkFirebird.Location = new System.Drawing.Point(400, 20);
+            this.chkFirebird.Name = "chkFirebird";
+            this.chkFirebird.Size = new System.Drawing.Size(104, 24);
+            this.chkFirebird.TabIndex = 8;
+            this.chkFirebird.Text = "Firebird";
             // 
-            // checkBox4
+            // chkSqlServer
             // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Location = new System.Drawing.Point(201, 142);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(85, 17);
-            this.checkBox4.TabIndex = 11;
-            this.checkBox4.Text = "PosgresSQL";
-            this.checkBox4.UseVisualStyleBackColor = true;
-            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
+            this.chkSqlServer.Location = new System.Drawing.Point(400, 50);
+            this.chkSqlServer.Name = "chkSqlServer";
+            this.chkSqlServer.Size = new System.Drawing.Size(104, 24);
+            this.chkSqlServer.TabIndex = 9;
+            this.chkSqlServer.Text = "SQL Server";
             // 
-            // checkBox5
+            // chkMySQL
             // 
-            this.checkBox5.AutoSize = true;
-            this.checkBox5.Location = new System.Drawing.Point(201, 174);
-            this.checkBox5.Name = "checkBox5";
-            this.checkBox5.Size = new System.Drawing.Size(69, 17);
-            this.checkBox5.TabIndex = 13;
-            this.checkBox5.Text = "ORACLE";
-            this.checkBox5.UseVisualStyleBackColor = true;
-            this.checkBox5.CheckedChanged += new System.EventHandler(this.checkBox5_CheckedChanged);
+            this.chkMySQL.Location = new System.Drawing.Point(400, 80);
+            this.chkMySQL.Name = "chkMySQL";
+            this.chkMySQL.Size = new System.Drawing.Size(104, 24);
+            this.chkMySQL.TabIndex = 10;
+            this.chkMySQL.Text = "MySQL";
+            // 
+            // chkPostgreSQL
+            // 
+            this.chkPostgreSQL.Location = new System.Drawing.Point(400, 110);
+            this.chkPostgreSQL.Name = "chkPostgreSQL";
+            this.chkPostgreSQL.Size = new System.Drawing.Size(104, 24);
+            this.chkPostgreSQL.TabIndex = 11;
+            this.chkPostgreSQL.Text = "PostgreSQL";
+            // 
+            // chkOracle
+            // 
+            this.chkOracle.Location = new System.Drawing.Point(400, 140);
+            this.chkOracle.Name = "chkOracle";
+            this.chkOracle.Size = new System.Drawing.Size(104, 24);
+            this.chkOracle.TabIndex = 12;
+            this.chkOracle.Text = "Oracle";
+            // 
+            // btnConectar
+            // 
+            this.btnConectar.Location = new System.Drawing.Point(100, 180);
+            this.btnConectar.Name = "btnConectar";
+            this.btnConectar.Size = new System.Drawing.Size(75, 23);
+            this.btnConectar.TabIndex = 13;
+            this.btnConectar.Text = "Iniciar Conexión";
+            this.btnConectar.Click += new System.EventHandler(this.btnConectar_Click);
+            // 
+            // btnCancelar
+            // 
+            this.btnCancelar.Location = new System.Drawing.Point(250, 180);
+            this.btnCancelar.Name = "btnCancelar";
+            this.btnCancelar.Size = new System.Drawing.Size(75, 23);
+            this.btnCancelar.TabIndex = 14;
+            this.btnCancelar.Text = "Cancelar";
+            this.btnCancelar.Click += new System.EventHandler(this.btnCancelar_Click);
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(316, 450);
-            this.Controls.Add(this.checkBox5);
-            this.Controls.Add(this.checkBox3);
-            this.Controls.Add(this.checkBox4);
-            this.Controls.Add(this.checkBox2);
-            this.Controls.Add(this.checkBox1);
-            this.Controls.Add(this.BttConexionFB);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.txtPassword);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.txtUsuario);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.txtRuta);
+            this.ClientSize = new System.Drawing.Size(500, 250);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtServidor);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.txtRutaBD);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.txtUsuario);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.txtContrasena);
+            this.Controls.Add(this.chkFirebird);
+            this.Controls.Add(this.chkSqlServer);
+            this.Controls.Add(this.chkMySQL);
+            this.Controls.Add(this.chkPostgreSQL);
+            this.Controls.Add(this.chkOracle);
+            this.Controls.Add(this.btnConectar);
+            this.Controls.Add(this.btnCancelar);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Inicio de Sesión";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
-
-        #endregion
-
-        private System.Windows.Forms.TextBox txtServidor;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox txtRuta;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox txtUsuario;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox txtPassword;
-        private System.Windows.Forms.Button BttConexionFB;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.CheckBox checkBox2;
-        private System.Windows.Forms.CheckBox checkBox3;
-        private System.Windows.Forms.CheckBox checkBox4;
-        private System.Windows.Forms.CheckBox checkBox5;
     }
 }
 

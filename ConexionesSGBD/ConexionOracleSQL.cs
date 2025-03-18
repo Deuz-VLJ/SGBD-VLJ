@@ -8,13 +8,14 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace ConexionesSGBD
 {
-    public class ConexionOracleSQL
+    public class ConexionOracleSQL : IBaseDatos
     {
         private readonly OracleConnection conexion;
-
-        public ConexionOracleSQL(string servidor, string baseDatos, string usuario, string contraseña)
+        //$"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={servidor})(PORT=1521))(CONNECT_DATA=(SID={baseDatos})));User Id={usuario};Password={contraseña};"
+        public ConexionOracleSQL(string servidor,  string usuario, string contraseña)
         {
-            string cadenaConexion = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={servidor})(PORT=1521))(CONNECT_DATA=(SID={baseDatos})));User Id={usuario};Password={contraseña};";
+            string cadenaConexion = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={servidor})(PORT=1521))(CONNECT_DATA=()));User Id={usuario};Password={contraseña};"
+;
             conexion = new OracleConnection(cadenaConexion);
         }
 
@@ -47,7 +48,7 @@ namespace ConexionesSGBD
             }
         }
 
-        private List<string> EjecutarConsulta(string consulta)
+        public List<string> EjecutarConsulta(string consulta)
         {
             List<string> resultados = new List<string>();
 
@@ -71,9 +72,46 @@ namespace ConexionesSGBD
             return resultados;
         }
 
+        public Dictionary<string, string> ObtenerAtributos(string tabla)
+        {
+            Dictionary<string, string> atributos = new Dictionary<string, string>();
+            string consulta = $"SELECT COLUMN_NAME, DATA_TYPE FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = '{tabla}' AND OWNER = (SELECT USER FROM dual);";
+
+            using (conexion)
+            {
+                conexion.Open();
+                using (OracleCommand comando = new OracleCommand(consulta, conexion))
+                using (OracleDataReader lector = comando.ExecuteReader())
+                {
+                    while (lector.Read())
+                    {
+                        atributos[lector["COLUMN_NAME"].ToString()] = lector["DATA_TYPE"].ToString();
+                    }
+                }
+            }
+            return atributos;
+        }
+        public List<string> ObtenerBasesDeDatos()
+        {
+            return EjecutarConsulta("SELECT NAME FROM v$database");
+        }
         public List<string> ObtenerTablas()
         {
-            return EjecutarConsulta("SELECT table_name FROM all_tables WHERE owner = USER;");
+            List<string> tablas = new List<string>();
+            string consulta = "SELECT OWNER, TABLE_NAME FROM ALL_TABLES;";
+
+            using (OracleCommand comando = new OracleCommand(consulta, conexion))
+            using (OracleDataReader lector = comando.ExecuteReader())
+            {
+                while (lector.Read())
+                {
+                    string baseDatos = lector["OWNER"].ToString();
+                    string nombreTabla = lector["TABLE_NAME"].ToString();
+                    tablas.Add($"{baseDatos}.{nombreTabla}");
+                }
+            }
+
+            return tablas;
         }
 
         public List<string> ObtenerVistas()
@@ -99,6 +137,16 @@ namespace ConexionesSGBD
         public List<string> ObtenerTiposDeDatos()
         {
             return EjecutarConsulta("SELECT DISTINCT data_type FROM all_tab_columns WHERE owner = USER;");
+        }
+
+        public List<string> ObtenerIndices()
+        {
+            return EjecutarConsulta("SELECT index_name FROM all_indexes WHERE owner = (SELECT USER FROM dual);");
+        }
+
+        public List<string> ObtenerSecuencias()
+        {
+            return EjecutarConsulta("SELECT sequence_name FROM all_sequences WHERE sequence_owner = (SELECT USER FROM dual);");
         }
     }
 }

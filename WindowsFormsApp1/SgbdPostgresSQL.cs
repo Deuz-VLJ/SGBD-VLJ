@@ -37,13 +37,13 @@ namespace WindowsFormsApp1
             foreach (var bd in conexionPostgres.ObtenerBasesDeDatos())
             {
                 TreeNode bdNode = new TreeNode(bd);
-                AgregarNodo(bdNode, "Tablas", conexionPostgres.ObtenerTablas(bd));
-                AgregarNodo(bdNode, "Vistas", conexionPostgres.ObtenerVistas(bd));
-                AgregarNodo(bdNode, "Procedimientos", conexionPostgres.ObtenerProcedimientos(bd));
-                AgregarNodo(bdNode, "Funciones", conexionPostgres.ObtenerFunciones(bd));
-                AgregarNodo(bdNode, "Triggers", conexionPostgres.ObtenerTriggers(bd));
-                AgregarNodo(bdNode, "Tipos de Datos", conexionPostgres.ObtenerTiposDeDatos(bd));
-                basesDeDatosNode.Nodes.Add(bdNode);
+                //AgregarNodo(bdNode, "Tablas", conexionPostgres.ObtenerTablas(bd));
+                //AgregarNodo(bdNode, "Vistas", conexionPostgres.ObtenerVistas(bd));
+                //AgregarNodo(bdNode, "Procedimientos", conexionPostgres.ObtenerProcedimientos(bd));
+                //AgregarNodo(bdNode, "Funciones", conexionPostgres.ObtenerFunciones(bd));
+                //AgregarNodo(bdNode, "Triggers", conexionPostgres.ObtenerTriggers(bd));
+                //AgregarNodo(bdNode, "Tipos de Datos", conexionPostgres.ObtenerTiposDeDatos(bd));
+                //basesDeDatosNode.Nodes.Add(bdNode);
             }
 
             rootNode.Nodes.Add(basesDeDatosNode);

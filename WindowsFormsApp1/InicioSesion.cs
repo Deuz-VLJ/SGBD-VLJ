@@ -13,164 +13,104 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
+        public string GestorSeleccionado { get; private set; }
+        public IBaseDatos Conexion { get; private set; } // Nueva propiedad para devolver la conexión
+
+       public string servidor;
+      public  string usuario;
+       public string contrasena;
+      public  string rutaBD;
         public Form1()
         {
             InitializeComponent();
         }
 
-
-
-        private void BttConexionFB_Click(object sender, EventArgs e)
+        private void btnConectar_Click(object sender, EventArgs e)
         {
-            string servidor = txtServidor.Text; // Dirección IP del servidor Firebird
-            string rutaBD = txtRuta.Text; // Ruta de la base de datos
-            string usuario = txtUsuario.Text; // Usuario de la base de datos
-            string contraseña = txtPassword.Text; // Respectiva contraseña del Usuario
+            // Obtener los datos ingresados por el usuario
+            servidor = txtServidor.Text.Trim();
+            usuario = txtUsuario.Text.Trim();
+            contrasena = txtContrasena.Text.Trim();
+            rutaBD = txtRutaBD.Text.Trim();
 
-            
-            if (checkBox1.Checked == true) 
+            // 🔹 Asegurar que `GestorSeleccionado` tiene el valor correcto
+            if (chkFirebird.Checked)
+                GestorSeleccionado = "Firebird";
+            else if (chkSqlServer.Checked)
+                GestorSeleccionado = "SQL Server";
+            else if (chkMySQL.Checked)
+                GestorSeleccionado = "MySQL";
+            else if (chkPostgreSQL.Checked)
+                GestorSeleccionado = "PostgreSQL";
+            else if (chkOracle.Checked)
+                GestorSeleccionado = "Oracle";
+            else
             {
-                ConexionFirebird conexion = new ConexionFirebird(servidor, rutaBD, usuario, contraseña);
-                if (conexion.ProbarConexion())
-                {
-                    MessageBox.Show("✅ Conexión exitosa a Firebird.");
-                    SgbdFirebird form2 = new SgbdFirebird(conexion);
-                    form2.Show();
-                    this.Hide();
-                }
-                else
-                {
-                    MessageBox.Show("❌ Error de conexión.");
-                }
-            }
-            if (checkBox2.Checked == true) 
-            {
-                 ConexionSQLServer conexion = new ConexionSQLServer(servidor, rutaBD, usuario, contraseña);
-                if (conexion.ProbarConexion())
-                {
-                    MessageBox.Show("✅ Conexión exitosa a SQLServer.");
-                    SgbdSQLServer form3 = new SgbdSQLServer(conexion);  
-                    form3.Show();
-                    this.Hide();
-                }
-                else
-                {
-                    MessageBox.Show("❌ Error de conexión.");
-                }
-            }
-            if (checkBox3.Checked == true)
-            {
-                ConexionMySQL conexion = new ConexionMySQL(servidor, rutaBD, usuario, contraseña);
-                if (conexion.ProbarConexion())
-                {
-                    MessageBox.Show("✅ Conexión exitosa a MySQL.");
-                    SgbdMySQL form4 = new SgbdMySQL(conexion);
-                    form4.Show();
-                    this.Hide();
-                }
-                else
-                {
-                    MessageBox.Show("❌ Error de conexión.");
-                }
-            }
-            if (checkBox4.Checked == true)
-            {
-                ConexionPostgresSQL conexion = new ConexionPostgresSQL(servidor, usuario, contraseña);
-                if (conexion.ProbarConexion())
-                {
-                    MessageBox.Show("✅ Conexión exitosa a PosgreSQL.");
-                    SgbdPostgresSQL form5 = new SgbdPostgresSQL(conexion);
-                    form5.Show();
-                    this.Hide();
-                }
-                else
-                {
-                    MessageBox.Show("❌ Error de conexión.");
-                }
-            }
-            if (checkBox5.Checked == true)
-            {
-                ConexionOracleSQL conexion = new ConexionOracleSQL(servidor, rutaBD, usuario, contraseña);
-                if (conexion.ProbarConexion())
-                {
-                    MessageBox.Show("✅ Conexión exitosa a ORACLESQL.");
-                    SgbdOracleSQL form5 = new SgbdOracleSQL(conexion);
-                    form5.Show();
-                    this.Hide();
-                }
-                else
-                {
-                    MessageBox.Show("❌ Error de conexión.");
-                }
+                MessageBox.Show("Seleccione un gestor de base de datos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
+            // 🔹 Agregar la marca de tiempo a la conexión
+            string nombreConexion = $"{GestorSeleccionado} - {DateTime.Now:HH:mm:ss}";
 
+            // 🔹 Crear la conexión según el gestor seleccionado
+            switch (GestorSeleccionado)
+            {
+                case "Firebird":
+                    if (string.IsNullOrEmpty(rutaBD))
+                    {
+                        MessageBox.Show("Ingrese la ruta de la base de datos para Firebird.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    Conexion = new ConexionFirebird(servidor, rutaBD, usuario, contrasena);
+                    break;
+
+                case "SQL Server":
+                    Conexion = new ConexionSQLServer(servidor, usuario, contrasena);
+                    break;
+
+                case "MySQL":
+                    Conexion = new ConexionMySQL(servidor, usuario, contrasena);
+                    break;
+
+                case "PostgreSQL":
+                    Conexion = new ConexionPostgresSQL(servidor, usuario, contrasena);
+                    break;
+
+                case "Oracle":
+                    Conexion = new ConexionOracleSQL(servidor, usuario, contrasena);
+                    break;
+
+                default:
+                    MessageBox.Show("Gestor de base de datos no soportado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+            }
+
+            // 🔹 Verificar conexión antes de continuar
+            if (!Conexion.ProbarConexion())
+            {
+                MessageBox.Show("No se pudo conectar a la base de datos. Verifique los datos ingresados.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 🔹 Guardar el nombre de la conexión con la hora correcta
+            GestorSeleccionado = nombreConexion;
+
+            // 🔹 Mostrar mensaje de éxito y cerrar formulario
+            MessageBox.Show($"Conexión exitosa: {nombreConexion}", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            this.DialogResult = DialogResult.OK;
+            this.Close();
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void btnCancelar_Click(object sender, EventArgs e)
         {
-            if (checkBox1.Checked)
-            {
-                // Desmarcar y deshabilitar los otros CheckBox
-                checkBox2.Checked = false;
-                checkBox3.Checked = false;
-                checkBox4.Checked = false;
-                checkBox5.Checked = false;
-            }
-        }
-
-        private void checkBox2_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox2.Checked)
-            {
-                // Desmarcar y deshabilitar los otros CheckBox
-                checkBox1.Checked = false;
-                checkBox3.Checked = false;
-                checkBox4.Checked = false;
-                checkBox5.Checked = false;
-            }
-        }
-
-        private void checkBox3_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox3.Checked)
-            {
-                // Desmarcar y deshabilitar los otros CheckBox
-                checkBox1.Checked = false;
-                checkBox2.Checked = false;
-                checkBox4.Checked = false;
-                checkBox5.Checked = false;
-
-            }
-        }
-
-        private void checkBox4_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox4.Checked)
-            {
-                // Desmarcar y deshabilitar los otros CheckBox
-                checkBox1.Checked = false;
-                checkBox2.Checked = false;
-                checkBox3.Checked = false;
-                checkBox5.Checked = false;
-            }
-        }
-
-        private void checkBox5_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox5.Checked)
-            {
-                // Desmarcar y deshabilitar los otros CheckBox
-                checkBox1.Checked = false;
-                checkBox2.Checked = false;
-                checkBox3.Checked = false;
-                checkBox4.Checked = false;
-            }
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            checkBox1.Checked = true;
+
         }
     }
 }
