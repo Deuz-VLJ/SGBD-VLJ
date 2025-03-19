@@ -12,10 +12,9 @@ namespace ConexionesSGBD
     {
         private readonly OracleConnection conexion;
         //$"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={servidor})(PORT=1521))(CONNECT_DATA=(SID={baseDatos})));User Id={usuario};Password={contraseña};"
-        public ConexionOracleSQL(string servidor,  string usuario, string contraseña)
+        public ConexionOracleSQL(string servidor, string usuario, string contraseña)
         {
-            string cadenaConexion = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={servidor})(PORT=1521))(CONNECT_DATA=()));User Id={usuario};Password={contraseña};"
-;
+            string cadenaConexion = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={servidor})(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE)));User Id={usuario};Password={contraseña};";
             conexion = new OracleConnection(cadenaConexion);
         }
 
@@ -75,39 +74,114 @@ namespace ConexionesSGBD
         public Dictionary<string, string> ObtenerAtributos(string tabla)
         {
             Dictionary<string, string> atributos = new Dictionary<string, string>();
-            string consulta = $"SELECT COLUMN_NAME, DATA_TYPE FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = '{tabla}' AND OWNER = (SELECT USER FROM dual);";
+            string consulta = $"SELECT COLUMN_NAME, DATA_TYPE FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = UPPER('{tabla}') AND OWNER = (SELECT USER FROM dual)";
 
-            using (conexion)
+            try
             {
-                conexion.Open();
+                using (OracleCommand comando = new OracleCommand(consulta, conexion))
+                {
+                    if (conexion.State == ConnectionState.Closed)
+                    {
+                        conexion.Open();
+                    }
+                    using (OracleDataReader lector = comando.ExecuteReader())
+                    {
+                        while (lector.Read())
+                        {
+                            if (!lector.IsDBNull(0) && !lector.IsDBNull(1))
+                            {
+                                atributos[lector.GetString(0)] = lector.GetString(1);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error en ObtenerAtributos() para la tabla '{tabla}': {ex.Message}");
+            }
+            finally
+            {
+                if (conexion.State == ConnectionState.Open)
+                {
+                    conexion.Close();
+                }
+            }
+
+            return atributos;
+        }
+
+        public List<string> ObtenerBasesDeDatos()
+        {
+            List<string> basesDeDatos = new List<string>();
+            string consulta = "SELECT DISTINCT OWNER FROM ALL_TABLES ORDER BY OWNER";
+
+            try
+            {
+                if (conexion.State == ConnectionState.Closed)
+                {
+                    conexion.Open();
+                }
+
                 using (OracleCommand comando = new OracleCommand(consulta, conexion))
                 using (OracleDataReader lector = comando.ExecuteReader())
                 {
                     while (lector.Read())
                     {
-                        atributos[lector["COLUMN_NAME"].ToString()] = lector["DATA_TYPE"].ToString();
+                        basesDeDatos.Add(lector.GetString(0));
                     }
                 }
             }
-            return atributos;
-        }
-        public List<string> ObtenerBasesDeDatos()
-        {
-            return EjecutarConsulta("SELECT NAME FROM v$database");
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener bases de datos: " + ex.Message);
+            }
+            finally
+            {
+                if (conexion.State == ConnectionState.Open)
+                {
+                    conexion.Close();
+                }
+            }
+
+            return basesDeDatos;
         }
         public List<string> ObtenerTablas()
         {
             List<string> tablas = new List<string>();
-            string consulta = "SELECT OWNER, TABLE_NAME FROM ALL_TABLES;";
+            string consulta = "SELECT OWNER, TABLE_NAME FROM ALL_TABLES";
 
-            using (OracleCommand comando = new OracleCommand(consulta, conexion))
-            using (OracleDataReader lector = comando.ExecuteReader())
+            try
             {
-                while (lector.Read())
+                using (OracleCommand comando = new OracleCommand(consulta, conexion))
                 {
-                    string baseDatos = lector["OWNER"].ToString();
-                    string nombreTabla = lector["TABLE_NAME"].ToString();
-                    tablas.Add($"{baseDatos}.{nombreTabla}");
+                    if (conexion.State == ConnectionState.Closed)
+                    {
+                        conexion.Open();
+                    }
+                    using (OracleDataReader lector = comando.ExecuteReader())
+                    {
+                        while (lector.Read())
+                        {
+                            if (!lector.IsDBNull(0) && !lector.IsDBNull(1))
+                            {
+                                string baseDatos = lector.GetString(0);
+                                string nombreTabla = lector.GetString(1);
+                                tablas.Add($"{baseDatos}.{nombreTabla}");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error en ObtenerTablas(): " + ex.Message);
+            }
+            finally
+            {
+                if (conexion.State == ConnectionState.Open)
+                {
+                    conexion.Close();
                 }
             }
 

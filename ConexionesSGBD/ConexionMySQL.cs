@@ -74,20 +74,36 @@ namespace ConexionesSGBD
         public Dictionary<string, string> ObtenerAtributos(string tabla)
         {
             Dictionary<string, string> atributos = new Dictionary<string, string>();
-            string consulta = $"DESCRIBE {tabla};";
+            string consulta = $"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tabla}';";
 
-            using ( conexion )
+            try
             {
-                conexion.Open();
+                if (conexion.State == ConnectionState.Closed)
+                {
+                    conexion.Open();
+                }
+
                 using (MySqlCommand comando = new MySqlCommand(consulta, conexion))
                 using (MySqlDataReader lector = comando.ExecuteReader())
                 {
                     while (lector.Read())
                     {
-                        atributos[lector["Field"].ToString()] = lector["Type"].ToString();
+                        atributos[lector["COLUMN_NAME"].ToString()] = lector["DATA_TYPE"].ToString();
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error en ObtenerAtributos() para la tabla '{tabla}': {ex.Message}");
+            }
+            finally
+            {
+                if (conexion.State == ConnectionState.Open)
+                {
+                    conexion.Close();
+                }
+            }
+
             return atributos;
         }
 
@@ -96,14 +112,36 @@ namespace ConexionesSGBD
             List<string> tablas = new List<string>();
             string consulta = "SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';";
 
-            using (MySqlCommand comando = new MySqlCommand(consulta, conexion))
-            using (MySqlDataReader lector = comando.ExecuteReader())
+            try
             {
-                while (lector.Read())
+                if (conexion.State == ConnectionState.Closed)
                 {
-                    string baseDatos = lector["TABLE_SCHEMA"].ToString();
-                    string nombreTabla = lector["TABLE_NAME"].ToString();
-                    tablas.Add($"{baseDatos}.{nombreTabla}");
+                    conexion.Open();
+                }
+
+                using (MySqlCommand comando = new MySqlCommand(consulta, conexion))
+                using (MySqlDataReader lector = comando.ExecuteReader())
+                {
+                    while (lector.Read())
+                    {
+                        if (!lector.IsDBNull(0) && !lector.IsDBNull(1))
+                        {
+                            string baseDatos = lector.GetString(0);
+                            string nombreTabla = lector.GetString(1);
+                            tablas.Add($"{baseDatos}.{nombreTabla}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error en ObtenerTablas(): {ex.Message}");
+            }
+            finally
+            {
+                if (conexion.State == ConnectionState.Open)
+                {
+                    conexion.Close();
                 }
             }
 
