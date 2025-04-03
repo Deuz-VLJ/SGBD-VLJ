@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApp1
 {
-    partial class Form1
+    public partial class Form1
     {
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.Label label1;

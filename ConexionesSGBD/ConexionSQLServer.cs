@@ -76,72 +76,69 @@ namespace ConexionesSGBD
             return resultados;
         }
 
-        public Dictionary<string, string> ObtenerAtributos(string tabla)
-        {
-            Dictionary<string, string> atributos = new Dictionary<string, string>();
-            string consulta = $"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tabla}';";
 
-            try
-            {
-                if (conexion.State == System.Data.ConnectionState.Closed)
-                {
-                    conexion.Open();
-                }
-
-                using (SqlCommand comando = new SqlCommand(consulta, conexion))
-                using (SqlDataReader lector = comando.ExecuteReader())
-                {
-                    while (lector.Read())
-                    {
-                        atributos[lector["COLUMN_NAME"].ToString()] = lector["DATA_TYPE"].ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error en ObtenerAtributos() para la tabla '{tabla}': {ex.Message}");
-            }
-
-            return atributos;
-        }
-
-        // Obtener listas de objetos de la base de datos actual
-        public List<string> ObtenerTablas()
+        public List<string> ObtenerTablas(string baseDatos)
         {
             List<string> tablas = new List<string>();
-            string consultaBases = "SELECT name FROM sys.databases WHERE state_desc = 'ONLINE' AND name NOT IN ('master', 'tempdb', 'model', 'msdb');";
+            string consulta = $"USE [{baseDatos}]; SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';";
 
-            List<string> basesDeDatos = new List<string>();
-
-            // 🔹 PRIMERO: Obtener la lista de bases de datos
-            using (SqlCommand comandoBases = new SqlCommand(consultaBases, conexion))
-            using (SqlDataReader lectorBases = comandoBases.ExecuteReader())
+            using (SqlCommand cmd = new SqlCommand(consulta, conexion))
+            using (SqlDataReader reader = cmd.ExecuteReader())
             {
-                while (lectorBases.Read())
+                while (reader.Read())
                 {
-                    basesDeDatos.Add(lectorBases["name"].ToString());
-                }
-            } // 🔹 Cierra el lector DESPUÉS de terminar de leer todas las bases de datos
-
-            // 🔹 SEGUNDO: Recorrer cada base de datos y obtener sus tablas
-            foreach (var baseDatos in basesDeDatos)
-            {
-                string consultaTablas = $"USE [{baseDatos}]; SELECT '{baseDatos}' + '.' + TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';";
-
-                using (SqlCommand comandoTablas = new SqlCommand(consultaTablas, conexion))
-                using (SqlDataReader lectorTablas = comandoTablas.ExecuteReader())
-                {
-                    while (lectorTablas.Read())
-                    {
-                        tablas.Add(lectorTablas[0].ToString());
-                    }
+                    tablas.Add(reader["TABLE_NAME"].ToString());
                 }
             }
 
             return tablas;
         }
 
-            
+        public Dictionary<string, string> ObtenerAtributos(string baseDatos, string tabla)
+        {
+            Dictionary<string, string> atributos = new Dictionary<string, string>();
+
+            // Obtener columnas y tipos
+            string consulta = $"USE [{baseDatos}]; SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tabla}';";
+            using (SqlCommand cmd = new SqlCommand(consulta, conexion))
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    atributos[reader["COLUMN_NAME"].ToString()] = reader["DATA_TYPE"].ToString();
+                }
+            }
+
+            // Obtener claves primarias
+            string pkQuery = $@"
+        USE [{baseDatos}];
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+        WHERE OBJECTPROPERTY(OBJECT_ID(CONSTRAINT_SCHEMA + '.' + CONSTRAINT_NAME), 'IsPrimaryKey') = 1 
+        AND TABLE_NAME = '{tabla}';";
+
+            List<string> clavesPrimarias = new List<string>();
+            using (SqlCommand cmd = new SqlCommand(pkQuery, conexion))
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    clavesPrimarias.Add(reader["COLUMN_NAME"].ToString());
+                }
+            }
+
+            // Agregar "PK" si corresponde
+            foreach (var pk in clavesPrimarias)
+            {
+                if (atributos.ContainsKey(pk))
+                {
+                    atributos[pk] += " (PK)";
+                }
+            }
+
+            return atributos;
+        }
+
 
 
         public List<string> ObtenerVistas()

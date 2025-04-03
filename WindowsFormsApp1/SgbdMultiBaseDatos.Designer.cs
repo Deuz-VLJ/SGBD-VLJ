@@ -33,13 +33,15 @@
             this.txtQuery = new System.Windows.Forms.TextBox();
             this.treeViewBD = new System.Windows.Forms.TreeView();
             this.comboBoxBD = new System.Windows.Forms.ComboBox();
+            this.BttDesconexion = new System.Windows.Forms.Button();
+            this.BttActualizar = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnAgregarConexion
             // 
-            this.btnAgregarConexion.Location = new System.Drawing.Point(13, 7);
+            this.btnAgregarConexion.Location = new System.Drawing.Point(16, 5);
             this.btnAgregarConexion.Name = "btnAgregarConexion";
-            this.btnAgregarConexion.Size = new System.Drawing.Size(16, 18);
+            this.btnAgregarConexion.Size = new System.Drawing.Size(22, 23);
             this.btnAgregarConexion.TabIndex = 9;
             this.btnAgregarConexion.Text = "+";
             this.btnAgregarConexion.UseVisualStyleBackColor = true;
@@ -79,11 +81,34 @@
             this.comboBoxBD.Size = new System.Drawing.Size(121, 21);
             this.comboBoxBD.TabIndex = 10;
             // 
+            // BttDesconexion
+            // 
+            this.BttDesconexion.Location = new System.Drawing.Point(44, 4);
+            this.BttDesconexion.Name = "BttDesconexion";
+            this.BttDesconexion.Size = new System.Drawing.Size(21, 23);
+            this.BttDesconexion.TabIndex = 11;
+            this.BttDesconexion.Text = "-";
+            this.BttDesconexion.UseVisualStyleBackColor = true;
+            this.BttDesconexion.Click += new System.EventHandler(this.BttDesconexion_Click);
+            // 
+            // BttActualizar
+            // 
+            this.BttActualizar.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BttActualizar.Location = new System.Drawing.Point(71, 4);
+            this.BttActualizar.Name = "BttActualizar";
+            this.BttActualizar.Size = new System.Drawing.Size(23, 23);
+            this.BttActualizar.TabIndex = 12;
+            this.BttActualizar.Text = "↻";
+            this.BttActualizar.UseVisualStyleBackColor = true;
+            this.BttActualizar.Click += new System.EventHandler(this.BttActualizar_Click);
+            // 
             // SgbdMultiBaseDatos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.BttActualizar);
+            this.Controls.Add(this.BttDesconexion);
             this.Controls.Add(this.comboBoxBD);
             this.Controls.Add(this.btnAgregarConexion);
             this.Controls.Add(this.btnEjecutar);
@@ -104,5 +129,7 @@
         private System.Windows.Forms.TextBox txtQuery;
         private System.Windows.Forms.TreeView treeViewBD;
         private System.Windows.Forms.ComboBox comboBoxBD;
+        private System.Windows.Forms.Button BttDesconexion;
+        private System.Windows.Forms.Button BttActualizar;
     }
 }

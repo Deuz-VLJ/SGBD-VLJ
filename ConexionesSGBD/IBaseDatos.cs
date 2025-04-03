@@ -12,14 +12,15 @@ namespace ConexionesSGBD
         void CerrarConexion();
         bool ProbarConexion();
         List<string> ObtenerBasesDeDatos(); // 🔹 Método agregado
-        List<string> ObtenerTablas();
+        List<string> ObtenerTablas(string baseDatos);
+        Dictionary<string, string> ObtenerAtributos(string baseDatos, string tabla);
         List<string> ObtenerVistas();
         List<string> ObtenerIndices();
         List<string> ObtenerProcedimientos();
         List<string> ObtenerSecuencias();
         List<string> ObtenerTriggers();
         List<string> ObtenerTiposDeDatos();
-        Dictionary<string, string> ObtenerAtributos(string tabla); // 🔹 Agregado
+       
 
         // 🔹 Nuevo método para ejecutar consultas
         List<string> EjecutarConsulta(string consulta);

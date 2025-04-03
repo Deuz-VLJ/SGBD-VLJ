@@ -1,7 +1,8 @@
-﻿using System;
+﻿// Código completo actualizado del formulario SgbdMultiBaseDatos
+
+using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -18,7 +19,7 @@ namespace WindowsFormsApp1
         public SgbdMultiBaseDatos(Dictionary<string, IBaseDatos> conexiones)
         {
             InitializeComponent();
-            this.conexiones = conexiones ?? new Dictionary<string, IBaseDatos>(); // Evitar nulos
+            this.conexiones = conexiones ?? new Dictionary<string, IBaseDatos>();
         }
 
         private void SgbdMultiBaseDatos_Load(object sender, EventArgs e)
@@ -27,357 +28,268 @@ namespace WindowsFormsApp1
             LlenarTreeView();
         }
 
-        // 🔹 Cargar todas las conexiones en el TreeView
         private void CargarListaConexiones()
         {
             treeViewBD.Nodes.Clear();
-
-            if (conexiones.Count == 0)
-            {
-                MessageBox.Show("No hay conexiones disponibles.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
             foreach (var conexion in conexiones)
             {
-                TreeNode conexionNode = new TreeNode(conexion.Key) { Tag = conexion.Key };
+                TreeNode conexionNode = new TreeNode(conexion.Key) { Tag = "conexion" };
                 treeViewBD.Nodes.Add(conexionNode);
             }
-
-            // Seleccionar la primera conexión automáticamente
             if (treeViewBD.Nodes.Count > 0)
             {
                 treeViewBD.SelectedNode = treeViewBD.Nodes[0];
-                CambiarConexion(treeViewBD.Nodes[0].Tag.ToString());
+                CambiarConexion(treeViewBD.SelectedNode.Text);
             }
         }
 
-        // 🔹 Evento cuando seleccionas una conexión en el TreeView
         private void TreeViewBD_AfterSelect_1(object sender, TreeViewEventArgs e)
         {
-            // 🔹 Si el nodo seleccionado es una conexión, cambiar a esa conexión
-            if (e.Node.Tag != null && e.Node.Tag.ToString() == "conexion")
+            if (e.Node.Tag?.ToString() == "conexion")
             {
                 CambiarConexion(e.Node.Text);
             }
-            // 🔹 Si el nodo seleccionado es una base de datos, actualizar la conexión y el ComboBox
-            else if (e.Node.Parent != null && e.Node.Parent.Tag != null && e.Node.Parent.Tag.ToString() == "conexion")
+            else if (e.Node.Parent != null && e.Node.Parent.Tag?.ToString() == "conexion")
             {
-                string baseDatosSeleccionada = e.Node.Text.Replace("Base de Datos: ", "").Trim();
-
-                if (conexionActual != null)
-                {
-                    conexionActual.CerrarConexion(); // 🔹 Cierra la conexión anterior
-                }
-
-                string nombreConexion = e.Node.Parent.Text; // 🔹 Nombre del gestor de BD (ejemplo: "SQL Server - 12:30:01")
-                if (!conexiones.ContainsKey(nombreConexion)) return; // 🔹 Validar que la conexión exista
-
-                conexionActual = conexiones[nombreConexion]; // 🔹 Cambiar conexión activa
-                nombreConexionActual = nombreConexion;
-                conexionActual.AbrirConexion(); // 🔹 Abrir la nueva conexión con la base seleccionada
-
-                // 🔹 Actualizar el ComboBox para reflejar la nueva base de datos seleccionada
-                if (comboBoxBD.Items.Contains(baseDatosSeleccionada))
-                {
-                    comboBoxBD.SelectedItem = baseDatosSeleccionada;
-                }
+                CambiarConexion(e.Node.Parent.Text);
+                string bd = e.Node.Text.Replace("Base de Datos: ", "");
+                if (comboBoxBD.Items.Contains(bd)) comboBoxBD.SelectedItem = bd;
             }
         }
 
-
-        // 🔹 Cambiar la conexión activa
         private void CambiarConexion(string nombreConexion)
         {
-            if (!conexiones.ContainsKey(nombreConexion))
-            {
-                MessageBox.Show("La conexión seleccionada no existe.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            if (!conexiones.ContainsKey(nombreConexion)) return;
 
-            if (conexionActual != null)
-            {
-                conexionActual.CerrarConexion(); // 🔹 Cierra la conexión anterior
-            }
+            conexionActual?.CerrarConexion();
 
-            // 🔹 Activar la nueva conexión
             conexionActual = conexiones[nombreConexion];
             nombreConexionActual = nombreConexion;
-            conexionActual.AbrirConexion(); // 🔹 Abre la nueva conexión
-
-            // 🔹 Actualizar el ComboBox con las bases de datos de la nueva conexión
+            conexionActual.AbrirConexion();
             CargarListaBasesDatos();
-
-            // 🔹 Actualizar el TreeView para reflejar la nueva conexión
             LlenarTreeView();
         }
 
-        // 🔹 Cargar bases de datos en el ComboBox
         private void CargarListaBasesDatos()
         {
             comboBoxBD.Items.Clear();
-
-            if (conexionActual == null)
-            {
-                MessageBox.Show("No hay conexión activa.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // 🔹 Obtener bases de datos disponibles
-            List<string> basesDeDatos = conexionActual.ObtenerBasesDeDatos();
-
-            if (basesDeDatos.Count == 0)
-            {
-                MessageBox.Show("No se encontraron bases de datos en este gestor.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            comboBoxBD.Items.AddRange(basesDeDatos.ToArray());
-            comboBoxBD.SelectedIndex = 0; // 🔹 Selecciona la primera base de datos automáticamente
+            if (conexionActual == null) return;
+            var bases = conexionActual.ObtenerBasesDeDatos();
+            comboBoxBD.Items.AddRange(bases.ToArray());
+            if (bases.Count > 0) comboBoxBD.SelectedIndex = 0;
         }
 
         private void comboBoxBD_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBoxBD.SelectedItem == null)
-            {
-                MessageBox.Show("Seleccione una base de datos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            nombreConexionActual = comboBoxBD.SelectedItem.ToString();
+            if (comboBoxBD.SelectedItem == null) return;
             LlenarTreeView();
         }
 
-        // 🔹 Llenar el TreeView con bases de datos y sus tablas
         private void LlenarTreeView()
         {
-            if (conexionActual == null)
-            {
-                MessageBox.Show("No hay conexión activa.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            if (conexionActual == null || string.IsNullOrEmpty(nombreConexionActual)) return;
 
-            // 🔹 Buscar si la conexión ya está en TreeView
-            TreeNode conexionNode = null;
-            foreach (TreeNode node in treeViewBD.Nodes)
-            {
-                if (node.Text == nombreConexionActual)
-                {
-                    conexionNode = node;
-                    break;
-                }
-            }
-
-            // 🔹 Si la conexión NO está en el TreeView, la agregamos como nodo raíz
+            TreeNode conexionNode = treeViewBD.Nodes.Cast<TreeNode>().FirstOrDefault(n => n.Text == nombreConexionActual);
             if (conexionNode == null)
             {
                 conexionNode = new TreeNode(nombreConexionActual) { Tag = "conexion" };
                 treeViewBD.Nodes.Add(conexionNode);
             }
-            else
-            {
-                // 🔹 Si la conexión ya existe, limpiar sus bases de datos antes de actualizar
-                conexionNode.Nodes.Clear();
-            }
 
-            // 🔹 Obtener bases de datos de esta conexión
-            List<string> basesDeDatos = conexionActual.ObtenerBasesDeDatos();
-            if (basesDeDatos.Count == 0)
-            {
-                MessageBox.Show("No se encontraron bases de datos en este gestor.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            conexionNode.Nodes.Clear();
 
-            foreach (var baseDatos in basesDeDatos)
+            foreach (string baseDatos in conexionActual.ObtenerBasesDeDatos())
             {
-                TreeNode baseNode = new TreeNode($"Base de Datos: {baseDatos}") { Tag = "baseDatos" };
+                TreeNode bdNode = new TreeNode("Base de Datos: " + baseDatos) { Tag = "baseDatos" };
+                TreeNode tablasNode = new TreeNode("Tablas");
 
-                // 🔹 Obtener todas las tablas de esta base de datos
-                List<string> tablas = conexionActual.ObtenerTablas();
-                if (tablas != null && tablas.Count > 0)
+                var tablas = conexionActual.ObtenerTablas(baseDatos);
+                foreach (var tabla in tablas)
                 {
-                    TreeNode tablasNode = new TreeNode("Tablas");
+                    TreeNode tablaNode = new TreeNode(tabla);
+                    var atributos = conexionActual.ObtenerAtributos(baseDatos, tabla);
 
-                    foreach (var tabla in tablas)
+                    foreach (var atributo in atributos)
                     {
-                        TreeNode tablaNode = new TreeNode(tabla);
-
-                        // 🔹 Obtener los atributos (columnas) de la tabla
-                        Dictionary<string, string> atributos = conexionActual.ObtenerAtributos(tabla);
-                        if (atributos != null && atributos.Count > 0)
-                        {
-                            foreach (var atributo in atributos)
-                            {
-                                tablaNode.Nodes.Add(new TreeNode($"{atributo.Key} ({atributo.Value})"));
-                            }
-                        }
-
-                        tablasNode.Nodes.Add(tablaNode);
+                        tablaNode.Nodes.Add(new TreeNode($"{atributo.Key} ({atributo.Value})"));
                     }
 
-                    baseNode.Nodes.Add(tablasNode);
+                    tablasNode.Nodes.Add(tablaNode);
                 }
 
-                conexionNode.Nodes.Add(baseNode);
+                if (tablasNode.Nodes.Count > 0)
+                    bdNode.Nodes.Add(tablasNode);
+
+                conexionNode.Nodes.Add(bdNode);
             }
 
-            conexionNode.Expand(); // 🔹 Expande la conexión actual
+            conexionNode.Expand();
         }
 
 
 
 
-
-
-        // 🔹 Agregar nodos de tablas y atributos
-        private void AgregarNodo(TreeNode parent, string nombre, List<string> elementos)
+        private string AdaptarConsulta(IBaseDatos conexion, string baseDatos, string consulta)
         {
-            if (elementos == null || elementos.Count == 0)
-            {
-                return;
-            }
-
-            TreeNode nodoCategoria = new TreeNode(nombre);
-            foreach (var item in elementos)
-            {
-                TreeNode tablaNode = new TreeNode(item);
-                Dictionary<string, string> atributos = conexionActual.ObtenerAtributos(item);
-
-                foreach (var atributo in atributos)
-                {
-                    tablaNode.Nodes.Add(new TreeNode($"{atributo.Key} ({atributo.Value})"));
-                }
-
-                nodoCategoria.Nodes.Add(tablaNode);
-            }
-
-            parent.Nodes.Add(nodoCategoria);
+            if (conexion is ConexionSQLServer)
+                return $"USE [{baseDatos}];\n{consulta}";
+            return consulta;
         }
 
-        // 🔹 Agregar una nueva conexión con el botón +
+        private void btnEjecutar_Click(object sender, EventArgs e)
+        {
+            if (conexionActual == null || comboBoxBD.SelectedItem == null) return;
+
+            string bd = comboBoxBD.SelectedItem.ToString();
+            string consulta = txtQuery.Text.Trim();
+            if (string.IsNullOrWhiteSpace(consulta)) return;
+
+            string consultaFinal = AdaptarConsulta(conexionActual, bd, consulta);
+
+            if (conexionActual is ConexionMySQL mysql)
+            {
+                try { mysql.CambiarBaseDatos(bd); }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"MySQL error: {ex.Message}"); return;
+                }
+            }
+
+            List<string> resultados = conexionActual.EjecutarConsulta(consultaFinal);
+
+            if (resultados.Count == 0)
+                MessageBox.Show("Consulta ejecutada con éxito.");
+            else if (resultados[0].StartsWith("Error:"))
+                MessageBox.Show(resultados[0]);
+            else
+                MessageBox.Show("Consulta ejecutada con éxito y datos retornados.");
+        }
+
+        private void BttDesconexion_Click(object sender, EventArgs e)
+        {
+            if (treeViewBD.SelectedNode == null) return;
+            TreeNode nodo = treeViewBD.SelectedNode;
+            if (nodo.Parent != null && nodo.Parent.Tag?.ToString() == "conexion") nodo = nodo.Parent;
+            if (nodo.Tag?.ToString() != "conexion") return;
+
+            string nombreConexion = nodo.Text;
+            if (conexiones.ContainsKey(nombreConexion))
+            {
+                conexiones[nombreConexion].CerrarConexion();
+                conexiones.Remove(nombreConexion);
+            }
+            treeViewBD.Nodes.Remove(nodo);
+            if (nombreConexionActual == nombreConexion)
+            {
+                conexionActual = null;
+                nombreConexionActual = null;
+                comboBoxBD.Items.Clear();
+                comboBoxBD.Text = "";
+            }
+        }
+
+
         private void btnAgregarConexion_Click_1(object sender, EventArgs e)
         {
             using (var loginForm = new Form1())
             {
                 if (loginForm.ShowDialog() == DialogResult.OK)
                 {
-                    string gestorSeleccionado = loginForm.GestorSeleccionado;
+                    string nombreConexion = loginForm.NombreConexion;
 
-                    // 🔹 Verificar que `GestorSeleccionado` NO esté vacío o nulo
-                    if (string.IsNullOrEmpty(gestorSeleccionado))
+                    if (string.IsNullOrEmpty(nombreConexion))
                     {
-                        MessageBox.Show("Error: No se recibió un gestor de base de datos válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("No se recibió un nombre de conexión válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
-                    // 🔹 Agregar la marca de tiempo a la conexión
-                    string nombreConexion = gestorSeleccionado;
+                    IBaseDatos nuevaConexion = loginForm.Conexion;
 
-                    // 🔹 Crear la conexión basada en `GestorSeleccionado`
-                    IBaseDatos nuevaConexion = null;
-
-                    switch (gestorSeleccionado.Split('-')[0].Trim()) // 🔹 Separa el nombre del gestor
+                    if (nuevaConexion == null)
                     {
-                        case "Firebird":
-                            nuevaConexion = loginForm.Conexion;
-                            break;
-                        case "SQL Server":
-                            nuevaConexion = loginForm.Conexion;
-                            break;
-                        case "MySQL":
-                            nuevaConexion = loginForm.Conexion;
-                            break;
-                        case "PostgreSQL":
-                            nuevaConexion = loginForm.Conexion;
-                            break;
-                        case "Oracle":
-                            nuevaConexion = loginForm.Conexion;
-                            break;
-                        default:
-                            MessageBox.Show("Gestor de base de datos no soportado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
+                        MessageBox.Show("La conexión no fue creada correctamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
                     }
 
-                    if (nuevaConexion != null)
+                    if (!conexiones.ContainsKey(nombreConexion))
                     {
-                        // 🔹 Asegurar que la conexión no se duplique
-                        if (!conexiones.ContainsKey(nombreConexion))
+                        conexiones[nombreConexion] = nuevaConexion;
+
+                        TreeNode nodoConexion = new TreeNode(nombreConexion)
                         {
-                            conexiones[nombreConexion] = nuevaConexion;
-
-                            // 🔹 Agregar nodo raíz SOLO SI no existe
-                            TreeNode conexionNode = new TreeNode(nombreConexion) { Tag = "conexion" };
-                            treeViewBD.Nodes.Add(conexionNode);
-                        }
-
-                        // 🔹 Cambiar a la nueva conexión
-                        CambiarConexion(nombreConexion);
+                            Tag = "conexion"
+                        };
+                        treeViewBD.Nodes.Add(nodoConexion);
                     }
+
+                    CambiarConexion(nombreConexion);
                 }
             }
         }
 
 
 
-
-        private void btnEjecutar_Click(object sender, EventArgs e)
+        private void BttActualizar_Click(object sender, EventArgs e)
         {
-            if (conexionActual == null)
-            {
-                MessageBox.Show("No hay conexión activa.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            if (treeViewBD.SelectedNode == null) return;
 
-            if (comboBoxBD.SelectedItem == null)
-            {
-                MessageBox.Show("Seleccione una base de datos antes de ejecutar la consulta.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            TreeNode nodo = treeViewBD.SelectedNode;
+            if (nodo.Parent != null && nodo.Parent.Tag?.ToString() == "conexion")
+                nodo = nodo.Parent;
 
-            string baseDatosSeleccionada = comboBoxBD.SelectedItem.ToString().Trim();
-            string consulta = txtQuery.Text.Trim();
+            if (nodo.Tag?.ToString() != "conexion") return;
 
-            if (string.IsNullOrEmpty(consulta))
-            {
-                MessageBox.Show("Ingrese una consulta para ejecutar.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            // 🔹 Verificar que la consulta no se está ejecutando en la base incorrecta
-            if (conexionActual is ConexionSQLServer && consulta.Trim().ToUpper().Contains("CREATE TABLE") && consulta.Trim().ToUpper().Contains("FIREBIRD"))
-            {
-                MessageBox.Show("No puedes crear una tabla de Firebird en SQL Server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // 🔹 Agregar `USE <BaseDeDatos>` antes de ejecutar la consulta solo si es SQL Server o MySQL
-            if (conexionActual is ConexionSQLServer || conexionActual is ConexionMySQL)
-            {
-                consulta = $"USE [{baseDatosSeleccionada}];\n" + consulta;
-            }
+            string nombreConexion = nodo.Text;
+            if (!conexiones.ContainsKey(nombreConexion)) return;
 
             try
             {
-                // 🔹 Ejecutar la consulta en la conexión actual
-                List<string> resultados = conexionActual.EjecutarConsulta(consulta);
+                var conexion = conexiones[nombreConexion];
+                conexion.CerrarConexion();
+                conexion.AbrirConexion();
 
-                // 🔹 Verificar si hubo error o si la consulta fue exitosa
-                if (resultados.Count == 0)
+                if (nombreConexionActual == nombreConexion)
                 {
-                    MessageBox.Show($"Consulta ejecutada con éxito en la base de datos: {baseDatosSeleccionada}.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    conexionActual = conexion;
+                    CargarListaBasesDatos();
                 }
-                else if (resultados[0].StartsWith("Error:"))
+
+                nodo.Nodes.Clear();
+
+                // 🔄 Recorremos cada base de datos individual
+                foreach (var bd in conexion.ObtenerBasesDeDatos())
                 {
-                    MessageBox.Show(resultados[0], "Error en la consulta", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    TreeNode bdNode = new TreeNode($"Base de Datos: {bd}") { Tag = "baseDatos" };
+                    TreeNode tablasNode = new TreeNode("Tablas");
+
+                    // 🔄 Obtener solo las tablas de esa base de datos
+                    var tablas = conexion.ObtenerTablas(bd);
+                    foreach (var tabla in tablas)
+                    {
+                        TreeNode tablaNode = new TreeNode(tabla);
+
+                        // 🔄 Obtener solo los atributos de esa tabla y base
+                        var atributos = conexion.ObtenerAtributos(bd, tabla);
+                        foreach (var atr in atributos)
+                        {
+                            tablaNode.Nodes.Add(new TreeNode($"{atr.Key} ({atr.Value})"));
+                        }
+
+                        tablasNode.Nodes.Add(tablaNode);
+                    }
+
+                    if (tablasNode.Nodes.Count > 0)
+                        bdNode.Nodes.Add(tablasNode);
+
+                    nodo.Nodes.Add(bdNode);
                 }
-                else
-                {
-                    MessageBox.Show($"Consulta ejecutada con éxito en la base de datos: {baseDatosSeleccionada}.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+
+                nodo.Expand();
+                MessageBox.Show("Conexión actualizada correctamente.", "Actualizado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al ejecutar la consulta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al actualizar: {ex.Message}");
             }
         }
 

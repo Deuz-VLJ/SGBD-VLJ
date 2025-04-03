@@ -71,45 +71,49 @@ namespace ConexionesSGBD
             return resultados;
         }
 
-        public Dictionary<string, string> ObtenerAtributos(string tabla)
+        public Dictionary<string, string> ObtenerAtributos(string esquema, string tabla)
         {
             Dictionary<string, string> atributos = new Dictionary<string, string>();
-            string consulta = $"SELECT COLUMN_NAME, DATA_TYPE FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = UPPER('{tabla}') AND OWNER = (SELECT USER FROM dual)";
+
+            string consulta = $@"
+        SELECT cols.COLUMN_NAME, cols.DATA_TYPE,
+               CASE 
+                   WHEN cons.CONSTRAINT_TYPE = 'P' THEN 'PK'
+                   ELSE ''
+               END AS KEY_TYPE
+        FROM ALL_TAB_COLUMNS cols
+        LEFT JOIN ALL_CONS_COLUMNS ccols 
+            ON cols.OWNER = ccols.OWNER AND cols.TABLE_NAME = ccols.TABLE_NAME AND cols.COLUMN_NAME = ccols.COLUMN_NAME
+        LEFT JOIN ALL_CONSTRAINTS cons 
+            ON ccols.OWNER = cons.OWNER AND ccols.CONSTRAINT_NAME = cons.CONSTRAINT_NAME
+        WHERE cols.OWNER = '{esquema.ToUpper()}' AND cols.TABLE_NAME = '{tabla.ToUpper()}'
+        ORDER BY cols.COLUMN_ID";
 
             try
             {
+                AbrirConexion();
                 using (OracleCommand comando = new OracleCommand(consulta, conexion))
+                using (OracleDataReader lector = comando.ExecuteReader())
                 {
-                    if (conexion.State == ConnectionState.Closed)
+                    while (lector.Read())
                     {
-                        conexion.Open();
-                    }
-                    using (OracleDataReader lector = comando.ExecuteReader())
-                    {
-                        while (lector.Read())
-                        {
-                            if (!lector.IsDBNull(0) && !lector.IsDBNull(1))
-                            {
-                                atributos[lector.GetString(0)] = lector.GetString(1);
-                            }
-                        }
+                        string nombre = lector["COLUMN_NAME"].ToString();
+                        string tipo = lector["DATA_TYPE"].ToString();
+                        string key = lector["KEY_TYPE"].ToString();
+
+                        atributos[nombre] = string.IsNullOrEmpty(key) ? tipo : $"{tipo} {key}";
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error en ObtenerAtributos() para la tabla '{tabla}': {ex.Message}");
-            }
-            finally
-            {
-                if (conexion.State == ConnectionState.Open)
-                {
-                    conexion.Close();
-                }
+                atributos.Clear();
+                atributos["Error"] = ex.Message;
             }
 
             return atributos;
         }
+
 
         public List<string> ObtenerBasesDeDatos()
         {
@@ -146,47 +150,32 @@ namespace ConexionesSGBD
 
             return basesDeDatos;
         }
-        public List<string> ObtenerTablas()
+
+        public List<string> ObtenerTablas(string esquema)
         {
             List<string> tablas = new List<string>();
-            string consulta = "SELECT OWNER, TABLE_NAME FROM ALL_TABLES";
+            string consulta = $"SELECT TABLE_NAME FROM ALL_TABLES WHERE OWNER = '{esquema.ToUpper()}'";
 
             try
             {
+                AbrirConexion();
                 using (OracleCommand comando = new OracleCommand(consulta, conexion))
+                using (OracleDataReader lector = comando.ExecuteReader())
                 {
-                    if (conexion.State == ConnectionState.Closed)
+                    while (lector.Read())
                     {
-                        conexion.Open();
-                    }
-                    using (OracleDataReader lector = comando.ExecuteReader())
-                    {
-                        while (lector.Read())
-                        {
-                            if (!lector.IsDBNull(0) && !lector.IsDBNull(1))
-                            {
-                                string baseDatos = lector.GetString(0);
-                                string nombreTabla = lector.GetString(1);
-                                tablas.Add($"{baseDatos}.{nombreTabla}");
-                            }
-                        }
+                        tablas.Add(lector.GetString(0));
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception("Error en ObtenerTablas(): " + ex.Message);
-            }
-            finally
-            {
-                if (conexion.State == ConnectionState.Open)
-                {
-                    conexion.Close();
-                }
+                tablas.Add($"Error: {ex.Message}");
             }
 
             return tablas;
         }
+
 
         public List<string> ObtenerVistas()
         {

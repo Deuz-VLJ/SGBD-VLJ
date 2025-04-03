@@ -79,51 +79,43 @@ namespace ConexionesSGBD
             return resultados;
         }
 
-        public Dictionary<string, string> ObtenerAtributos(string tabla)
+
+        //cm
+        public Dictionary<string, string> ObtenerAtributos(string baseDatos, string tabla)
         {
             Dictionary<string, string> atributos = new Dictionary<string, string>();
+            string consulta = $@"
+        SELECT rf.RDB$FIELD_NAME, f.RDB$FIELD_TYPE, co.RDB$CONSTRAINT_TYPE
+        FROM RDB$RELATION_FIELDS rf
+        JOIN RDB$FIELDS f ON rf.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME
+        LEFT JOIN RDB$INDEX_SEGMENTS ixs ON ixs.RDB$FIELD_NAME = rf.RDB$FIELD_NAME
+        LEFT JOIN RDB$INDICES ix ON ix.RDB$INDEX_NAME = ixs.RDB$INDEX_NAME
+        LEFT JOIN RDB$RELATION_CONSTRAINTS co ON co.RDB$INDEX_NAME = ix.RDB$INDEX_NAME
+        WHERE rf.RDB$RELATION_NAME = '{tabla.ToUpper()}';";
 
             try
             {
-                if (conexion.State != ConnectionState.Open)
+                AbrirConexion();
+                using (FbCommand cmd = new FbCommand(consulta, conexion))
+                using (FbDataReader reader = cmd.ExecuteReader())
                 {
-                    conexion.Open();
-                }
-
-                // 🔹 Extraer solo el nombre de la tabla si viene en formato "BaseDeDatos.Tabla"
-                string nombreTabla = tabla.Contains(".") ? tabla.Split('.')[1] : tabla;
-
-                string consulta = @"
-            SELECT TRIM(rf.RDB$FIELD_NAME) AS COLUMN_NAME, TRIM(dt.RDB$TYPE_NAME) AS DATA_TYPE
-            FROM RDB$RELATION_FIELDS rf
-            JOIN RDB$FIELDS f ON rf.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME
-            JOIN RDB$TYPES dt ON f.RDB$FIELD_TYPE = dt.RDB$TYPE
-            WHERE rf.RDB$RELATION_NAME = @tabla
-            AND dt.RDB$FIELD_NAME = 'RDB$FIELD_TYPE';
-        ";
-
-                using (FbCommand comando = new FbCommand(consulta, conexion))
-                {
-                    comando.Parameters.AddWithValue("@tabla", nombreTabla);
-
-                    using (FbDataReader lector = comando.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (lector.Read())
-                        {
-                            string columna = lector["COLUMN_NAME"].ToString().Trim();
-                            string tipoDato = lector["DATA_TYPE"].ToString().Trim();
-                            atributos[columna] = tipoDato;
-                        }
+                        string campo = reader.GetString(0).Trim();
+                        string tipoDato = reader.GetInt16(1).ToString(); // Opcionalmente podrías mapear los tipos Firebird
+                        string esPK = !reader.IsDBNull(2) && reader.GetString(2).Trim() == "PRIMARY KEY" ? "PK" : "";
+                        atributos[campo] = string.IsNullOrEmpty(esPK) ? tipoDato : $"{tipoDato} {esPK}";
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error en ObtenerAtributos() Firebird para la tabla '{tabla}': {ex.Message}");
+                atributos.Add("Error", ex.Message);
             }
 
             return atributos;
         }
+
 
 
         // Métodos para obtener la estructura de la base de datos
@@ -160,47 +152,32 @@ namespace ConexionesSGBD
 
 
 
-
-        public List<string> ObtenerTablas()
+        //cm
+        public List<string> ObtenerTablas(string baseDatos)
         {
             List<string> tablas = new List<string>();
+            string consulta = "SELECT RDB$RELATION_NAME FROM RDB$RELATIONS WHERE RDB$SYSTEM_FLAG = 0;";
 
             try
             {
-                if (conexion.State != ConnectionState.Open)
+                AbrirConexion();
+                using (FbCommand cmd = new FbCommand(consulta, conexion))
+                using (FbDataReader reader = cmd.ExecuteReader())
                 {
-                    conexion.Open();
-                }
-
-                // 🔹 Obtener solo las tablas de usuario en Firebird (evitar tablas del sistema)
-                string consulta = @"
-            SELECT TRIM(RDB$RELATION_NAME) AS TABLE_NAME 
-            FROM RDB$RELATIONS 
-            WHERE RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL
-            ORDER BY RDB$RELATION_NAME;";
-
-                using (FbCommand comando = new FbCommand(consulta, conexion))
-                using (FbDataReader lector = comando.ExecuteReader())
-                {
-                    while (lector.Read())
+                    while (reader.Read())
                     {
-                        string nombreTabla = lector["TABLE_NAME"].ToString().Trim();
-
-                        // 🔹 Filtrar nombres incorrectos como "GBD"
-                        if (!string.IsNullOrEmpty(nombreTabla) && !nombreTabla.StartsWith("RDB$"))
-                        {
-                            tablas.Add(nombreTabla);
-                        }
+                        tablas.Add(reader.GetString(0).Trim());
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error en ObtenerTablas() Firebird: {ex.Message}");
+                tablas.Add($"Error: {ex.Message}");
             }
 
             return tablas;
         }
+
 
         // 🔹 Método para obtener el nombre de la base de datos activa en Firebird
         private string ObtenerNombreBaseDeDatos()

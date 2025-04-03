@@ -71,82 +71,65 @@ namespace ConexionesSGBD
             return resultados;
         }
 
-        public Dictionary<string, string> ObtenerAtributos(string tabla)
+        public Dictionary<string, string> ObtenerAtributos(string baseDatos, string tabla)
         {
             Dictionary<string, string> atributos = new Dictionary<string, string>();
-            string consulta = $"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tabla}';";
+            string consulta = $@"
+        SELECT COLUMN_NAME, DATA_TYPE,
+        CASE WHEN COLUMN_KEY = 'PRI' THEN 'PK' ELSE '' END AS KEY_TYPE
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = '{baseDatos}' AND TABLE_NAME = '{tabla}';";
 
             try
             {
-                if (conexion.State == ConnectionState.Closed)
-                {
-                    conexion.Open();
-                }
-
+                AbrirConexion();
                 using (MySqlCommand comando = new MySqlCommand(consulta, conexion))
                 using (MySqlDataReader lector = comando.ExecuteReader())
                 {
                     while (lector.Read())
                     {
-                        atributos[lector["COLUMN_NAME"].ToString()] = lector["DATA_TYPE"].ToString();
+                        string columna = lector["COLUMN_NAME"].ToString();
+                        string tipo = lector["DATA_TYPE"].ToString();
+                        string key = lector["KEY_TYPE"].ToString();
+                        atributos[columna] = string.IsNullOrEmpty(key) ? tipo : $"{tipo} {key}";
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error en ObtenerAtributos() para la tabla '{tabla}': {ex.Message}");
-            }
-            finally
-            {
-                if (conexion.State == ConnectionState.Open)
-                {
-                    conexion.Close();
-                }
+                atributos.Clear();
+                atributos["Error"] = ex.Message;
             }
 
             return atributos;
         }
 
-        public List<string> ObtenerTablas()
+
+        public List<string> ObtenerTablas(string baseDatos)
         {
             List<string> tablas = new List<string>();
-            string consulta = "SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';";
+            string consulta = $"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{baseDatos}' AND TABLE_TYPE = 'BASE TABLE';";
 
             try
             {
-                if (conexion.State == ConnectionState.Closed)
-                {
-                    conexion.Open();
-                }
-
+                AbrirConexion();
                 using (MySqlCommand comando = new MySqlCommand(consulta, conexion))
                 using (MySqlDataReader lector = comando.ExecuteReader())
                 {
                     while (lector.Read())
                     {
-                        if (!lector.IsDBNull(0) && !lector.IsDBNull(1))
-                        {
-                            string baseDatos = lector.GetString(0);
-                            string nombreTabla = lector.GetString(1);
-                            tablas.Add($"{baseDatos}.{nombreTabla}");
-                        }
+                        tablas.Add(lector.GetString(0));
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error en ObtenerTablas(): {ex.Message}");
-            }
-            finally
-            {
-                if (conexion.State == ConnectionState.Open)
-                {
-                    conexion.Close();
-                }
+                tablas.Add($"Error: {ex.Message}");
             }
 
             return tablas;
         }
+
 
 
         public List<string> ObtenerBasesDeDatos()
@@ -187,5 +170,30 @@ namespace ConexionesSGBD
         {
             return new List<string>(); // 🔹 MySQL no usa secuencias, utiliza AUTO_INCREMENT en su lugar.
         }
+
+
+
+        public void CambiarBaseDatos(string nuevaBD)
+        {
+            try
+            {
+                if (conexion.State != ConnectionState.Open)
+                {
+                    conexion.Open();
+                }
+
+                conexion.ChangeDatabase(nuevaBD);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al cambiar de base de datos en MySQL: {ex.Message}");
+            }
+        }
+
+
+
     }
 }
+
+
+

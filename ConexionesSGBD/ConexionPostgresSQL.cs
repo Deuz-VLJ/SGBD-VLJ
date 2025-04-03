@@ -71,25 +71,54 @@ namespace ConexionesSGBD
         return resultados;
     }
 
-        public Dictionary<string, string> ObtenerAtributos(string tabla)
+        public Dictionary<string, string> ObtenerAtributos(string baseDatos, string tabla)
         {
             Dictionary<string, string> atributos = new Dictionary<string, string>();
-            string consulta = $"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '{tabla}';";
 
-            using (conexion)
+            string consulta = $@"
+        SELECT 
+            cols.column_name, 
+            cols.data_type,
+            CASE 
+                WHEN pk.column_name IS NOT NULL THEN 'PK'
+                ELSE ''
+            END AS key_type
+        FROM information_schema.columns cols
+        LEFT JOIN (
+            SELECT 
+                kcu.column_name
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu 
+                ON tc.constraint_name = kcu.constraint_name
+            WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name = '{tabla}'
+        ) pk ON cols.column_name = pk.column_name
+        WHERE cols.table_name = '{tabla}' AND cols.table_schema = 'public';";
+
+            try
             {
-                conexion.Open();
+                AbrirConexion();
                 using (NpgsqlCommand comando = new NpgsqlCommand(consulta, conexion))
                 using (NpgsqlDataReader lector = comando.ExecuteReader())
                 {
                     while (lector.Read())
                     {
-                        atributos[lector["column_name"].ToString()] = lector["data_type"].ToString();
+                        string nombre = lector["column_name"].ToString();
+                        string tipo = lector["data_type"].ToString();
+                        string key = lector["key_type"].ToString();
+
+                        atributos[nombre] = string.IsNullOrEmpty(key) ? tipo : $"{tipo} {key}";
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                atributos.Clear();
+                atributos["Error"] = ex.Message;
+            }
+
             return atributos;
         }
+
 
         public List<string> ObtenerBasesDeDatos()
         {
@@ -98,24 +127,31 @@ namespace ConexionesSGBD
 
 
 
-        public List<string> ObtenerTablas()
+        public List<string> ObtenerTablas(string baseDatos)
         {
             List<string> tablas = new List<string>();
-            string consulta = "SELECT table_catalog, table_name FROM information_schema.tables WHERE table_schema = 'public';";
+            string consulta = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';";
 
-            using (NpgsqlCommand comando = new NpgsqlCommand(consulta, conexion))
-            using (NpgsqlDataReader lector = comando.ExecuteReader())
+            try
             {
-                while (lector.Read())
+                AbrirConexion();
+                using (NpgsqlCommand comando = new NpgsqlCommand(consulta, conexion))
+                using (NpgsqlDataReader lector = comando.ExecuteReader())
                 {
-                    string baseDatos = lector["table_catalog"].ToString();
-                    string nombreTabla = lector["table_name"].ToString();
-                    tablas.Add($"{baseDatos}.{nombreTabla}");
+                    while (lector.Read())
+                    {
+                        tablas.Add(lector.GetString(0));
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                tablas.Add($"Error: {ex.Message}");
             }
 
             return tablas;
         }
+
 
 
         public List<string> ObtenerVistas()
