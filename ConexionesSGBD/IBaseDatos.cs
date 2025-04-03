@@ -14,13 +14,20 @@ namespace ConexionesSGBD
         List<string> ObtenerBasesDeDatos(); // 🔹 Método agregado
         List<string> ObtenerTablas(string baseDatos);
         Dictionary<string, string> ObtenerAtributos(string baseDatos, string tabla);
-        List<string> ObtenerVistas();
+        
         List<string> ObtenerIndices();
-        List<string> ObtenerProcedimientos();
+       
         List<string> ObtenerSecuencias();
         List<string> ObtenerTriggers();
         List<string> ObtenerTiposDeDatos();
-       
+
+        //nuevo
+
+        List<string> ObtenerVistas(string baseDatos);
+        List<string> ObtenerLlavesPrimarias(string baseDatos);
+        List<string> ObtenerLlavesForaneas(string baseDatos);
+        List<string> ObtenerProcedimientos(string baseDatos);
+
 
         // 🔹 Nuevo método para ejecutar consultas
         List<string> EjecutarConsulta(string consulta);

@@ -101,14 +101,16 @@ namespace WindowsFormsApp1
             foreach (string baseDatos in conexionActual.ObtenerBasesDeDatos())
             {
                 TreeNode bdNode = new TreeNode("Base de Datos: " + baseDatos) { Tag = "baseDatos" };
-                TreeNode tablasNode = new TreeNode("Tablas");
 
+                // Tablas
+                TreeNode tablasNode = new TreeNode("Tablas");
                 var tablas = conexionActual.ObtenerTablas(baseDatos);
                 foreach (var tabla in tablas)
                 {
                     TreeNode tablaNode = new TreeNode(tabla);
-                    var atributos = conexionActual.ObtenerAtributos(baseDatos, tabla);
 
+                    // Atributos
+                    var atributos = conexionActual.ObtenerAtributos(baseDatos, tabla);
                     foreach (var atributo in atributos)
                     {
                         tablaNode.Nodes.Add(new TreeNode($"{atributo.Key} ({atributo.Value})"));
@@ -116,15 +118,55 @@ namespace WindowsFormsApp1
 
                     tablasNode.Nodes.Add(tablaNode);
                 }
-
                 if (tablasNode.Nodes.Count > 0)
                     bdNode.Nodes.Add(tablasNode);
+
+                // Vistas
+                TreeNode vistasNode = new TreeNode("Vistas");
+                var vistas = conexionActual.ObtenerVistas(baseDatos);
+                foreach (var vista in vistas)
+                {
+                    vistasNode.Nodes.Add(new TreeNode(vista));
+                }
+                if (vistasNode.Nodes.Count > 0)
+                    bdNode.Nodes.Add(vistasNode);
+
+                // Llaves Primarias
+                TreeNode pkNode = new TreeNode("Llaves Primarias");
+                var pks = conexionActual.ObtenerLlavesPrimarias(baseDatos);
+                foreach (var pk in pks)
+                {
+                    pkNode.Nodes.Add(new TreeNode(pk));
+                }
+                if (pkNode.Nodes.Count > 0)
+                    bdNode.Nodes.Add(pkNode);
+
+                // Llaves Foráneas
+                TreeNode fkNode = new TreeNode("Llaves Foráneas");
+                var fks = conexionActual.ObtenerLlavesForaneas(baseDatos);
+                foreach (var fk in fks)
+                {
+                    fkNode.Nodes.Add(new TreeNode(fk));
+                }
+                if (fkNode.Nodes.Count > 0)
+                    bdNode.Nodes.Add(fkNode);
+
+                // Procedimientos Almacenados
+                TreeNode procNode = new TreeNode("Procedimientos");
+                var procs = conexionActual.ObtenerProcedimientos(baseDatos);
+                foreach (var proc in procs)
+                {
+                    procNode.Nodes.Add(new TreeNode(proc));
+                }
+                if (procNode.Nodes.Count > 0)
+                    bdNode.Nodes.Add(procNode);
 
                 conexionNode.Nodes.Add(bdNode);
             }
 
             conexionNode.Expand();
         }
+
 
 
 

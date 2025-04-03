@@ -33,9 +33,9 @@ namespace WindowsFormsApp1
             TreeNode rootNode = new TreeNode("BASE DE DATOS Firebirt");
 
            // AgregarNodo(rootNode, "Tablas", conexionFirebird.ObtenerTablas());
-            AgregarNodo(rootNode, "Views", conexionFirebird.ObtenerVistas());
+           // AgregarNodo(rootNode, "Views", conexionFirebird.ObtenerVistas());
             AgregarNodo(rootNode, "Índices", conexionFirebird.ObtenerIndices());
-            AgregarNodo(rootNode, "Procedimientos", conexionFirebird.ObtenerProcedimientos());
+           // AgregarNodo(rootNode, "Procedimientos", conexionFirebird.ObtenerProcedimientos());
             AgregarNodo(rootNode, "Sequences", conexionFirebird.ObtenerSecuencias());
             AgregarNodo(rootNode, "Triggers", conexionFirebird.ObtenerTriggers());
             AgregarNodo(rootNode, "Data Types", conexionFirebird.ObtenerTiposDeDatos());

@@ -33,8 +33,8 @@ namespace WindowsFormsApp1
             TreeNode rootNode = new TreeNode("BaseDatosOracle");
 
            // AgregarNodo(rootNode, "Tablas", conexionOracle.ObtenerTablas());
-            AgregarNodo(rootNode, "Vistas", conexionOracle.ObtenerVistas());
-            AgregarNodo(rootNode, "Procedimientos", conexionOracle.ObtenerProcedimientos());
+           // AgregarNodo(rootNode, "Vistas", conexionOracle.ObtenerVistas());
+           // AgregarNodo(rootNode, "Procedimientos", conexionOracle.ObtenerProcedimientos());
             AgregarNodo(rootNode, "Funciones", conexionOracle.ObtenerFunciones());
             AgregarNodo(rootNode, "Triggers", conexionOracle.ObtenerTriggers());
             AgregarNodo(rootNode, "Tipos de Datos", conexionOracle.ObtenerTiposDeDatos());

@@ -130,6 +130,100 @@ namespace ConexionesSGBD
             return tablas;
         }
 
+        public List<string> ObtenerVistas(string baseDatos)
+        {
+            List<string> vistas = new List<string>();
+            string consulta = $"SELECT table_name FROM information_schema.views WHERE table_schema = '{baseDatos}';";
+
+            AbrirConexion();
+            using (MySqlCommand cmd = new MySqlCommand(consulta, conexion))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    vistas.Add(reader.GetString(0));
+                }
+            }
+
+            return vistas;
+        }
+
+        public List<string> ObtenerLlavesPrimarias(string baseDatos)
+        {
+            List<string> llaves = new List<string>();
+            string consulta = $@"
+        SELECT TABLE_NAME, COLUMN_NAME 
+        FROM information_schema.KEY_COLUMN_USAGE 
+        WHERE CONSTRAINT_NAME = 'PRIMARY' 
+        AND table_schema = '{baseDatos}';";
+
+            AbrirConexion();
+            using (MySqlCommand cmd = new MySqlCommand(consulta, conexion))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string tabla = reader.GetString("TABLE_NAME");
+                    string columna = reader.GetString("COLUMN_NAME");
+                    llaves.Add($"{tabla}.{columna}");
+                }
+            }
+
+            return llaves;
+        }
+
+        public List<string> ObtenerLlavesForaneas(string baseDatos)
+        {
+            List<string> foraneas = new List<string>();
+            string consulta = $@"
+        SELECT 
+            table_name AS tabla_origen,
+            column_name AS columna_origen,
+            referenced_table_name AS tabla_referenciada,
+            referenced_column_name AS columna_referenciada
+        FROM information_schema.KEY_COLUMN_USAGE 
+        WHERE referenced_table_name IS NOT NULL 
+        AND table_schema = '{baseDatos}';";
+
+            AbrirConexion();
+            using (MySqlCommand cmd = new MySqlCommand(consulta, conexion))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string origen = reader.GetString("tabla_origen");
+                    string columnaOrigen = reader.GetString("columna_origen");
+                    string destino = reader.GetString("tabla_referenciada");
+                    string columnaDestino = reader.GetString("columna_referenciada");
+                    foraneas.Add($"FK: {origen}.{columnaOrigen} → {destino}.{columnaDestino}");
+                }
+            }
+
+            return foraneas;
+        }
+
+        public List<string> ObtenerProcedimientos(string baseDatos)
+        {
+            List<string> procedimientos = new List<string>();
+            string consulta = $@"
+        SELECT routine_name 
+        FROM information_schema.routines 
+        WHERE routine_type = 'PROCEDURE' 
+        AND routine_schema = '{baseDatos}';";
+
+            AbrirConexion();
+            using (MySqlCommand cmd = new MySqlCommand(consulta, conexion))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    procedimientos.Add(reader.GetString(0));
+                }
+            }
+
+            return procedimientos;
+        }
+
 
 
         public List<string> ObtenerBasesDeDatos()
@@ -137,15 +231,6 @@ namespace ConexionesSGBD
             return EjecutarConsulta("SHOW DATABASES;");
         }
 
-        public List<string> ObtenerVistas()
-        {
-            return EjecutarConsulta("SELECT TABLE_NAME FROM information_schema.VIEWS WHERE TABLE_SCHEMA = DATABASE();");
-        }
-
-        public List<string> ObtenerProcedimientos()
-        {
-            return EjecutarConsulta("SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_SCHEMA = DATABASE();");
-        }
 
         public List<string> ObtenerFunciones()
         {

@@ -140,16 +140,104 @@ namespace ConexionesSGBD
         }
 
 
-
-        public List<string> ObtenerVistas()
+        public List<string> ObtenerVistas(string baseDatos)
         {
-            return EjecutarConsulta("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS;");
+            List<string> vistas = new List<string>();
+            string consulta = $"USE [{baseDatos}]; SELECT name FROM sys.views;";
+
+            AbrirConexion();
+            using (SqlCommand cmd = new SqlCommand(consulta, conexion))
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    vistas.Add(reader.GetString(0));
+                }
+            }
+
+            return vistas;
         }
 
-        public List<string> ObtenerProcedimientos()
+        public List<string> ObtenerLlavesPrimarias(string baseDatos)
         {
-            return EjecutarConsulta("SELECT name FROM sys.procedures;");
+            List<string> llaves = new List<string>();
+            string consulta = $@"
+        USE [{baseDatos}];
+        SELECT t.name AS Tabla, c.name AS Columna
+        FROM sys.indexes i
+        INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+        INNER JOIN sys.columns c ON ic.object_id = c.object_id AND c.column_id = ic.column_id
+        INNER JOIN sys.tables t ON i.object_id = t.object_id
+        WHERE i.is_primary_key = 1;";
+
+            AbrirConexion();
+            using (SqlCommand cmd = new SqlCommand(consulta, conexion))
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string tabla = reader.GetString(0);
+                    string columna = reader.GetString(1);
+                    llaves.Add($"{tabla}.{columna}");
+                }
+            }
+
+            return llaves;
         }
+
+        public List<string> ObtenerLlavesForaneas(string baseDatos)
+        {
+            List<string> foraneas = new List<string>();
+            string consulta = $@"
+        USE [{baseDatos}];
+        SELECT 
+            fk.name AS FK_Name,
+            tp.name AS TablaPadre,
+            cp.name AS ColumnaPadre,
+            tr.name AS TablaReferencia,
+            cr.name AS ColumnaReferencia
+        FROM sys.foreign_keys fk
+        INNER JOIN sys.foreign_key_columns fkc ON fkc.constraint_object_id = fk.object_id
+        INNER JOIN sys.tables tp ON tp.object_id = fk.parent_object_id
+        INNER JOIN sys.columns cp ON cp.object_id = tp.object_id AND cp.column_id = fkc.parent_column_id
+        INNER JOIN sys.tables tr ON tr.object_id = fk.referenced_object_id
+        INNER JOIN sys.columns cr ON cr.object_id = tr.object_id AND cr.column_id = fkc.referenced_column_id;";
+
+            AbrirConexion();
+            using (SqlCommand cmd = new SqlCommand(consulta, conexion))
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string origen = reader.GetString(1);
+                    string colOrigen = reader.GetString(2);
+                    string destino = reader.GetString(3);
+                    string colDestino = reader.GetString(4);
+                    foraneas.Add($"FK: {origen}.{colOrigen} → {destino}.{colDestino}");
+                }
+            }
+
+            return foraneas;
+        }
+
+        public List<string> ObtenerProcedimientos(string baseDatos)
+        {
+            List<string> procedimientos = new List<string>();
+            string consulta = $"USE [{baseDatos}]; SELECT name FROM sys.procedures;";
+
+            AbrirConexion();
+            using (SqlCommand cmd = new SqlCommand(consulta, conexion))
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    procedimientos.Add(reader.GetString(0));
+                }
+            }
+
+            return procedimientos;
+        }
+
 
         public List<string> ObtenerFunciones()
         {

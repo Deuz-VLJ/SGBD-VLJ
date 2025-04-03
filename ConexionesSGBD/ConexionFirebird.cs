@@ -206,19 +206,113 @@ namespace ConexionesSGBD
         }
 
 
-        public List<string> ObtenerVistas()
+
+        public List<string> ObtenerVistas(string baseDatos)
         {
-            return EjecutarConsulta("SELECT RDB$VIEW_NAME FROM RDB$RELATIONS WHERE RDB$VIEW_BLR IS NOT NULL;");
+            List<string> vistas = new List<string>();
+            string consulta = "SELECT RDB$RELATION_NAME FROM RDB$RELATIONS WHERE RDB$VIEW_BLR IS NOT NULL AND RDB$SYSTEM_FLAG = 0;";
+
+            AbrirConexion();
+            using (FbCommand cmd = new FbCommand(consulta, conexion))
+            using (FbDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    vistas.Add(reader.GetString(0).Trim());
+                }
+            }
+
+            return vistas;
         }
+
+        public List<string> ObtenerLlavesPrimarias(string baseDatos)
+        {
+            List<string> llaves = new List<string>();
+            string consulta = @"
+        SELECT
+            sg.RDB$RELATION_NAME AS TABLA,
+            si.RDB$FIELD_NAME AS COLUMNA
+        FROM
+            RDB$RELATION_CONSTRAINTS sg
+            JOIN RDB$INDEX_SEGMENTS si ON sg.RDB$INDEX_NAME = si.RDB$INDEX_NAME
+        WHERE
+            sg.RDB$CONSTRAINT_TYPE = 'PRIMARY KEY';";
+
+            AbrirConexion();
+            using (FbCommand cmd = new FbCommand(consulta, conexion))
+            using (FbDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string tabla = reader.GetString(0).Trim();
+                    string columna = reader.GetString(1).Trim();
+                    llaves.Add($"{tabla}.{columna}");
+                }
+            }
+
+            return llaves;
+        }
+
+
+        public List<string> ObtenerLlavesForaneas(string baseDatos)
+        {
+            List<string> foraneas = new List<string>();
+            string consulta = @"
+        SELECT
+            c.RDB$RELATION_NAME AS TABLA_ORIGEN,
+            i.RDB$FIELD_NAME AS COLUMNA_ORIGEN,
+            rc.RDB$CONST_NAME_UQ AS FK_NAME
+        FROM
+            RDB$RELATION_CONSTRAINTS c
+            JOIN RDB$INDEX_SEGMENTS i ON c.RDB$INDEX_NAME = i.RDB$INDEX_NAME
+            JOIN RDB$REF_CONSTRAINTS rc ON c.RDB$CONSTRAINT_NAME = rc.RDB$CONSTRAINT_NAME
+        WHERE
+            c.RDB$CONSTRAINT_TYPE = 'FOREIGN KEY';";
+
+            AbrirConexion();
+            using (FbCommand cmd = new FbCommand(consulta, conexion))
+            using (FbDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string tabla = reader.GetString(0).Trim();
+                    string columna = reader.GetString(1).Trim();
+                    string fk = reader.GetString(2).Trim();
+                    foraneas.Add($"FK {fk}: {tabla}.{columna}");
+                }
+            }
+
+            return foraneas;
+        }
+
+
+        public List<string> ObtenerProcedimientos(string baseDatos)
+        {
+            List<string> procedimientos = new List<string>();
+            string consulta = "SELECT RDB$PROCEDURE_NAME FROM RDB$PROCEDURES;";
+
+            AbrirConexion();
+            using (FbCommand cmd = new FbCommand(consulta, conexion))
+            using (FbDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    procedimientos.Add(reader.GetString(0).Trim());
+                }
+            }
+
+            return procedimientos;
+        }
+
+
+
+
+
+
 
         public List<string> ObtenerIndices()
         {
             return EjecutarConsulta("SELECT RDB$INDEX_NAME FROM RDB$INDICES;");
-        }
-
-        public List<string> ObtenerProcedimientos()
-        {
-            return EjecutarConsulta("SELECT RDB$PROCEDURE_NAME FROM RDB$PROCEDURES;");
         }
 
         public List<string> ObtenerSecuencias()

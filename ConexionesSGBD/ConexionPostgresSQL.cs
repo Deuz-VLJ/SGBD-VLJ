@@ -125,8 +125,6 @@ namespace ConexionesSGBD
             return EjecutarConsulta("SELECT datname FROM pg_database WHERE datistemplate = false;");
         }
 
-
-
         public List<string> ObtenerTablas(string baseDatos)
         {
             List<string> tablas = new List<string>();
@@ -152,17 +150,113 @@ namespace ConexionesSGBD
             return tablas;
         }
 
-
-
-        public List<string> ObtenerVistas()
+        public List<string> ObtenerVistas(string baseDatos)
         {
-            return EjecutarConsulta("SELECT viewname FROM pg_views WHERE schemaname = 'public';");
+            List<string> vistas = new List<string>();
+            string consulta = @"
+        SELECT table_name
+        FROM information_schema.views
+        WHERE table_schema = 'public';";
+
+            AbrirConexion();
+            using (NpgsqlCommand cmd = new NpgsqlCommand(consulta, conexion))
+            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    vistas.Add(reader.GetString(0));
+                }
+            }
+
+            return vistas;
         }
 
-        public List<string> ObtenerProcedimientos()
+        public List<string> ObtenerLlavesPrimarias(string baseDatos)
         {
-            return EjecutarConsulta("SELECT proname FROM pg_proc JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid WHERE nspname = 'public';");
+            List<string> llaves = new List<string>();
+            string consulta = @"
+        SELECT
+            kcu.table_name,
+            kcu.column_name
+        FROM
+            information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+            ON tc.constraint_name = kcu.constraint_name
+           AND tc.table_schema = kcu.table_schema
+        WHERE tc.constraint_type = 'PRIMARY KEY'
+          AND tc.table_schema = 'public';";
+
+            AbrirConexion();
+            using (NpgsqlCommand cmd = new NpgsqlCommand(consulta, conexion))
+            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    llaves.Add($"{reader.GetString(0)}.{reader.GetString(1)}");
+                }
+            }
+
+            return llaves;
         }
+
+        public List<string> ObtenerLlavesForaneas(string baseDatos)
+        {
+            List<string> foraneas = new List<string>();
+            string consulta = @"
+        SELECT
+            tc.table_name,
+            kcu.column_name,
+            ccu.table_name AS referenced_table,
+            ccu.column_name AS referenced_column
+        FROM
+            information_schema.table_constraints AS tc
+        JOIN information_schema.key_column_usage AS kcu
+            ON tc.constraint_name = kcu.constraint_name
+        JOIN information_schema.constraint_column_usage AS ccu
+            ON ccu.constraint_name = tc.constraint_name
+        WHERE tc.constraint_type = 'FOREIGN KEY'
+          AND tc.table_schema = 'public';";
+
+            AbrirConexion();
+            using (NpgsqlCommand cmd = new NpgsqlCommand(consulta, conexion))
+            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string origen = reader.GetString(0);
+                    string colOrigen = reader.GetString(1);
+                    string destino = reader.GetString(2);
+                    string colDestino = reader.GetString(3);
+                    foraneas.Add($"FK: {origen}.{colOrigen} → {destino}.{colDestino}");
+                }
+            }
+
+            return foraneas;
+        }
+
+        public List<string> ObtenerProcedimientos(string baseDatos)
+        {
+            List<string> procedimientos = new List<string>();
+            string consulta = @"
+        SELECT routine_name
+        FROM information_schema.routines
+        WHERE routine_type = 'PROCEDURE'
+          AND specific_schema = 'public';";
+
+            AbrirConexion();
+            using (NpgsqlCommand cmd = new NpgsqlCommand(consulta, conexion))
+            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    procedimientos.Add(reader.GetString(0));
+                }
+            }
+
+            return procedimientos;
+        }
+
+
 
         public List<string> ObtenerFunciones()
         {
