@@ -72,48 +72,7 @@ namespace ConexionesSGBD
             return resultados;
         }
 
-        public Dictionary<string, string> ObtenerAtributos(string esquema, string tabla)
-        {
-            Dictionary<string, string> atributos = new Dictionary<string, string>();
-
-            string consulta = $@"
-        SELECT cols.COLUMN_NAME, cols.DATA_TYPE,
-               CASE 
-                   WHEN cons.CONSTRAINT_TYPE = 'P' THEN 'PK'
-                   ELSE ''
-               END AS KEY_TYPE
-        FROM ALL_TAB_COLUMNS cols
-        LEFT JOIN ALL_CONS_COLUMNS ccols 
-            ON cols.OWNER = ccols.OWNER AND cols.TABLE_NAME = ccols.TABLE_NAME AND cols.COLUMN_NAME = ccols.COLUMN_NAME
-        LEFT JOIN ALL_CONSTRAINTS cons 
-            ON ccols.OWNER = cons.OWNER AND ccols.CONSTRAINT_NAME = cons.CONSTRAINT_NAME
-        WHERE cols.OWNER = '{esquema.ToUpper()}' AND cols.TABLE_NAME = '{tabla.ToUpper()}'
-        ORDER BY cols.COLUMN_ID";
-
-            try
-            {
-                AbrirConexion();
-                using (OracleCommand comando = new OracleCommand(consulta, conexion))
-                using (OracleDataReader lector = comando.ExecuteReader())
-                {
-                    while (lector.Read())
-                    {
-                        string nombre = lector["COLUMN_NAME"].ToString();
-                        string tipo = lector["DATA_TYPE"].ToString();
-                        string key = lector["KEY_TYPE"].ToString();
-
-                        atributos[nombre] = string.IsNullOrEmpty(key) ? tipo : $"{tipo} {key}";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                atributos.Clear();
-                atributos["Error"] = ex.Message;
-            }
-
-            return atributos;
-        }
+       
 
 
         public List<string> ObtenerBasesDeDatos()
@@ -152,30 +111,7 @@ namespace ConexionesSGBD
             return basesDeDatos;
         }
 
-        public List<string> ObtenerTablas(string esquema)
-        {
-            List<string> tablas = new List<string>();
-            string consulta = $"SELECT TABLE_NAME FROM ALL_TABLES WHERE OWNER = '{esquema.ToUpper()}'";
 
-            try
-            {
-                AbrirConexion();
-                using (OracleCommand comando = new OracleCommand(consulta, conexion))
-                using (OracleDataReader lector = comando.ExecuteReader())
-                {
-                    while (lector.Read())
-                    {
-                        tablas.Add(lector.GetString(0));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                tablas.Add($"Error: {ex.Message}");
-            }
-
-            return tablas;
-        }
 
         //public List<string> ObtenerLlavesPrimarias()
         //{
@@ -209,13 +145,59 @@ namespace ConexionesSGBD
         //}
 
 
+        public List<string> ObtenerTablas(string baseDatos)
+        {
+            List<string> tablas = new List<string>();
+            string consulta = $@"
+SELECT table_name 
+FROM all_tables 
+WHERE owner = '{baseDatos.ToUpper()}'";
+
+            AbrirConexion();
+            using (OracleCommand cmd = new OracleCommand(consulta, conexion))
+            using (OracleDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    tablas.Add(reader.GetString(0));
+                }
+            }
+
+            return tablas;
+        }
+
+
+        public Dictionary<string, string> ObtenerAtributos(string baseDatos, string tabla)
+        {
+            Dictionary<string, string> atributos = new Dictionary<string, string>();
+            string consulta = $@"
+SELECT column_name, data_type 
+FROM all_tab_columns 
+WHERE owner = '{baseDatos.ToUpper()}' AND table_name = '{tabla.ToUpper()}'";
+
+            AbrirConexion();
+            using (OracleCommand cmd = new OracleCommand(consulta, conexion))
+            using (OracleDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string nombre = reader.GetString(0);
+                    string tipo = reader.GetString(1);
+                    atributos[nombre] = tipo;
+                }
+            }
+
+            return atributos;
+        }
+
+
         public List<string> ObtenerVistas(string baseDatos)
         {
             List<string> vistas = new List<string>();
             string consulta = $@"
-        SELECT view_name 
-        FROM all_views 
-        WHERE owner = '{baseDatos.ToUpper()}';";
+SELECT view_name 
+FROM all_views 
+WHERE owner = '{baseDatos.ToUpper()}'";
 
             AbrirConexion();
             using (OracleCommand cmd = new OracleCommand(consulta, conexion))
@@ -230,17 +212,18 @@ namespace ConexionesSGBD
             return vistas;
         }
 
+
         public List<string> ObtenerLlavesPrimarias(string baseDatos)
         {
             List<string> llaves = new List<string>();
             string consulta = $@"
-        SELECT acc.table_name, acc.column_name
-        FROM all_cons_columns acc
-        JOIN all_constraints ac
-          ON acc.constraint_name = ac.constraint_name
-         AND acc.owner = ac.owner
-        WHERE ac.constraint_type = 'P'
-          AND ac.owner = '{baseDatos.ToUpper()}';";
+SELECT acc.table_name, acc.column_name
+FROM all_cons_columns acc
+JOIN all_constraints ac
+  ON acc.constraint_name = ac.constraint_name
+ AND acc.owner = ac.owner
+WHERE ac.constraint_type = 'P'
+  AND ac.owner = '{baseDatos.ToUpper()}'";
 
             AbrirConexion();
             using (OracleCommand cmd = new OracleCommand(consulta, conexion))
@@ -255,16 +238,18 @@ namespace ConexionesSGBD
             return llaves;
         }
 
+
+
         public List<string> ObtenerLlavesForaneas(string baseDatos)
         {
             List<string> foraneas = new List<string>();
             string consulta = $@"
-        SELECT a.table_name, a.column_name, c_pk.table_name AS ref_table, b.column_name AS ref_column
-        FROM all_cons_columns a
-        JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name
-        JOIN all_constraints c_pk ON c.r_owner = c_pk.owner AND c.r_constraint_name = c_pk.constraint_name
-        JOIN all_cons_columns b ON b.owner = c_pk.owner AND b.constraint_name = c_pk.constraint_name AND b.position = a.position
-        WHERE c.constraint_type = 'R' AND c.owner = '{baseDatos.ToUpper()}';";
+SELECT a.table_name, a.column_name, c_pk.table_name AS ref_table, b.column_name AS ref_column
+FROM all_cons_columns a
+JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name
+JOIN all_constraints c_pk ON c.r_owner = c_pk.owner AND c.r_constraint_name = c_pk.constraint_name
+JOIN all_cons_columns b ON b.owner = c_pk.owner AND b.constraint_name = c_pk.constraint_name AND b.position = a.position
+WHERE c.constraint_type = 'R' AND c.owner = '{baseDatos.ToUpper()}'";
 
             AbrirConexion();
             using (OracleCommand cmd = new OracleCommand(consulta, conexion))
@@ -283,14 +268,14 @@ namespace ConexionesSGBD
             return foraneas;
         }
 
+
         public List<string> ObtenerProcedimientos(string baseDatos)
         {
             List<string> procedimientos = new List<string>();
             string consulta = $@"
-        SELECT object_name 
-        FROM all_objects 
-        WHERE object_type = 'PROCEDURE'
-          AND owner = '{baseDatos.ToUpper()}';";
+SELECT object_name 
+FROM all_objects 
+WHERE object_type = 'PROCEDURE' AND owner = '{baseDatos.ToUpper()}'";
 
             AbrirConexion();
             using (OracleCommand cmd = new OracleCommand(consulta, conexion))
@@ -304,6 +289,13 @@ namespace ConexionesSGBD
 
             return procedimientos;
         }
+
+
+
+
+
+
+
 
 
         public List<string> ObtenerFunciones()

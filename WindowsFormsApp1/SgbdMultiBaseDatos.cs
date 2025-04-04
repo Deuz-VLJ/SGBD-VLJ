@@ -59,14 +59,53 @@ namespace WindowsFormsApp1
 
         private void CambiarConexion(string nombreConexion)
         {
-            if (!conexiones.ContainsKey(nombreConexion)) return;
+            if (!conexiones.ContainsKey(nombreConexion))
+                return;
 
+            // 🔴 Cerrar la conexión anterior si existe
             conexionActual?.CerrarConexion();
 
+            // 🔁 Cambiar conexión
             conexionActual = conexiones[nombreConexion];
             nombreConexionActual = nombreConexion;
+
+            // ✅ Abrir conexión sin cambiar aún de base de datos
             conexionActual.AbrirConexion();
+
+            // 🔄 Cargar bases de datos al ComboBox
             CargarListaBasesDatos();
+
+            // 🔄 Si hay una base seleccionada en el ComboBox, cambiar a ella (especialmente útil para PostgreSQL)
+            if (comboBoxBD.SelectedItem != null)
+            {
+                string baseSeleccionada = comboBoxBD.SelectedItem.ToString();
+
+                // 🔁 Cambiar de base de datos si es PostgreSQL o MySQL
+                if (conexionActual is ConexionPostgresSQL postgres)
+                {
+                    try
+                    {
+                        postgres.CambiarBaseDatos(baseSeleccionada);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al cambiar base de datos en PostgreSQL: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else if (conexionActual is ConexionMySQL mysql)
+                {
+                    try
+                    {
+                        mysql.CambiarBaseDatos(baseSeleccionada);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al cambiar base de datos en MySQL: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+
+            // 🔄 Actualizar el TreeView con los datos actualizados de la conexión y base
             LlenarTreeView();
         }
 
@@ -79,11 +118,38 @@ namespace WindowsFormsApp1
             if (bases.Count > 0) comboBoxBD.SelectedIndex = 0;
         }
 
+        //private void comboBoxBD_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    if (comboBoxBD.SelectedItem == null) return;
+        //    LlenarTreeView();
+        //}
+
         private void comboBoxBD_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBoxBD.SelectedItem == null) return;
+            if (comboBoxBD.SelectedItem == null || conexionActual == null)
+                return;
+
+            string baseDatos = comboBoxBD.SelectedItem.ToString();
+
+            // 🔹 Solo para PostgreSQL: recrear la conexión con la nueva base
+            if (conexionActual is ConexionPostgresSQL postgres)
+            {
+                try
+                {
+                    postgres.CambiarBaseDatos(baseDatos);
+                    postgres.AbrirConexion(); // 🔄 Asegurarse de abrir la nueva conexión
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"No se pudo cambiar la base de datos en PostgreSQL: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            // 🔄 Refrescar vista con la nueva base seleccionada
             LlenarTreeView();
         }
+
 
         private void LlenarTreeView()
         {
@@ -131,25 +197,32 @@ namespace WindowsFormsApp1
                 if (vistasNode.Nodes.Count > 0)
                     bdNode.Nodes.Add(vistasNode);
 
-                // Llaves Primarias
+                // Llaves (Primarias y Foráneas en un solo nodo)
+                TreeNode llavesNode = new TreeNode("Llaves");
+
                 TreeNode pkNode = new TreeNode("Llaves Primarias");
                 var pks = conexionActual.ObtenerLlavesPrimarias(baseDatos);
                 foreach (var pk in pks)
                 {
                     pkNode.Nodes.Add(new TreeNode(pk));
                 }
-                if (pkNode.Nodes.Count > 0)
-                    bdNode.Nodes.Add(pkNode);
 
-                // Llaves Foráneas
                 TreeNode fkNode = new TreeNode("Llaves Foráneas");
                 var fks = conexionActual.ObtenerLlavesForaneas(baseDatos);
                 foreach (var fk in fks)
                 {
                     fkNode.Nodes.Add(new TreeNode(fk));
                 }
-                if (fkNode.Nodes.Count > 0)
-                    bdNode.Nodes.Add(fkNode);
+
+                if (pkNode.Nodes.Count > 0 || fkNode.Nodes.Count > 0)
+                {
+                    if (pkNode.Nodes.Count > 0)
+                        llavesNode.Nodes.Add(pkNode);
+                    if (fkNode.Nodes.Count > 0)
+                        llavesNode.Nodes.Add(fkNode);
+
+                    bdNode.Nodes.Add(llavesNode);
+                }
 
                 // Procedimientos Almacenados
                 TreeNode procNode = new TreeNode("Procedimientos");
@@ -186,25 +259,51 @@ namespace WindowsFormsApp1
             string consulta = txtQuery.Text.Trim();
             if (string.IsNullOrWhiteSpace(consulta)) return;
 
-            string consultaFinal = AdaptarConsulta(conexionActual, bd, consulta);
-
+            // 🔹 Cambiar base de datos antes de ejecutar, si aplica
             if (conexionActual is ConexionMySQL mysql)
             {
-                try { mysql.CambiarBaseDatos(bd); }
+                try
+                {
+                    mysql.CambiarBaseDatos(bd);
+                }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"MySQL error: {ex.Message}"); return;
+                    MessageBox.Show($"MySQL error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            else if (conexionActual is ConexionPostgresSQL postgres)
+            {
+                try
+                {
+                    postgres.CambiarBaseDatos(bd);
+                    postgres.AbrirConexion(); // 🔑 Reabrir la conexión con la nueva base
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"PostgreSQL error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
             }
 
-            List<string> resultados = conexionActual.EjecutarConsulta(consultaFinal);
+            // 🔹 Adaptar consulta si es SQL Server
+            string consultaFinal = AdaptarConsulta(conexionActual, bd, consulta);
 
-            if (resultados.Count == 0)
-                MessageBox.Show("Consulta ejecutada con éxito.");
-            else if (resultados[0].StartsWith("Error:"))
-                MessageBox.Show(resultados[0]);
-            else
-                MessageBox.Show("Consulta ejecutada con éxito y datos retornados.");
+            try
+            {
+                List<string> resultados = conexionActual.EjecutarConsulta(consultaFinal);
+
+                if (resultados.Count == 0)
+                    MessageBox.Show("Consulta ejecutada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                else if (resultados[0].StartsWith("Error:"))
+                    MessageBox.Show(resultados[0], "Error en la consulta", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else
+                    MessageBox.Show("Consulta ejecutada con éxito y datos retornados.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al ejecutar la consulta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void BttDesconexion_Click(object sender, EventArgs e)
@@ -264,10 +363,45 @@ namespace WindowsFormsApp1
                         treeViewBD.Nodes.Add(nodoConexion);
                     }
 
+                    // ✅ Cambiar a la nueva conexión
                     CambiarConexion(nombreConexion);
+
+                    // ✅ Si hay bases disponibles, seleccionar la primera y cambiarla si aplica
+                    if (comboBoxBD.Items.Count > 0)
+                    {
+                        comboBoxBD.SelectedIndex = 0;
+                        string bdSeleccionada = comboBoxBD.SelectedItem.ToString();
+
+                        if (nuevaConexion is ConexionPostgresSQL postgres)
+                        {
+                            try
+                            {
+                                postgres.CambiarBaseDatos(bdSeleccionada);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"PostgreSQL: No se pudo cambiar de base: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                        else if (nuevaConexion is ConexionMySQL mysql)
+                        {
+                            try
+                            {
+                                mysql.CambiarBaseDatos(bdSeleccionada);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"MySQL: No se pudo cambiar de base: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+
+                        // 🔁 Refrescar el TreeView con la nueva base seleccionada
+                        LlenarTreeView();
+                    }
                 }
             }
         }
+
 
 
 
