@@ -469,5 +469,10 @@ namespace WindowsFormsApp1
             }
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var migracionForm = new MigrasionFm(conexiones);
+            migracionForm.Show();
+        }
     }
 }

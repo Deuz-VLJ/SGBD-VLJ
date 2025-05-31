@@ -147,11 +147,11 @@
     <Compile Include="InicioSesion.Designer.cs">
       <DependentUpon>InicioSesion.cs</DependentUpon>
     </Compile>
-    <Compile Include="SgbdFirebird.cs">
+    <Compile Include="MigrasionFm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SgbdFirebird.Designer.cs">
-      <DependentUpon>SgbdFirebird.cs</DependentUpon>
+    <Compile Include="MigrasionFm.Designer.cs">
+      <DependentUpon>MigrasionFm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -161,35 +161,11 @@
     <Compile Include="SgbdMultiBaseDatos.Designer.cs">
       <DependentUpon>SgbdMultiBaseDatos.cs</DependentUpon>
     </Compile>
-    <Compile Include="SgbdMySQL.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SgbdMySQL.Designer.cs">
-      <DependentUpon>SgbdMySQL.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SgbdOracleSQL.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SgbdOracleSQL.Designer.cs">
-      <DependentUpon>SgbdOracleSQL.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SgbdPostgresSQL.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SgbdPostgresSQL.Designer.cs">
-      <DependentUpon>SgbdPostgresSQL.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SgbdSQLServer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SgbdSQLServer.Designer.cs">
-      <DependentUpon>SgbdSQLServer.cs</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="InicioSesion.resx">
       <DependentUpon>InicioSesion.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SgbdFirebird.resx">
-      <DependentUpon>SgbdFirebird.cs</DependentUpon>
+    <EmbeddedResource Include="MigrasionFm.resx">
+      <DependentUpon>MigrasionFm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -202,18 +178,6 @@
     </Compile>
     <EmbeddedResource Include="SgbdMultiBaseDatos.resx">
       <DependentUpon>SgbdMultiBaseDatos.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SgbdMySQL.resx">
-      <DependentUpon>SgbdMySQL.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SgbdOracleSQL.resx">
-      <DependentUpon>SgbdOracleSQL.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SgbdPostgresSQL.resx">
-      <DependentUpon>SgbdPostgresSQL.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SgbdSQLServer.resx">
-      <DependentUpon>SgbdSQLServer.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

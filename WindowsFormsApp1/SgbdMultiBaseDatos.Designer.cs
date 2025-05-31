@@ -35,6 +35,7 @@
             this.comboBoxBD = new System.Windows.Forms.ComboBox();
             this.BttDesconexion = new System.Windows.Forms.Button();
             this.BttActualizar = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnAgregarConexion
@@ -102,11 +103,23 @@
             this.BttActualizar.UseVisualStyleBackColor = true;
             this.BttActualizar.Click += new System.EventHandler(this.BttActualizar_Click);
             // 
+            // button1
+            // 
+            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.Location = new System.Drawing.Point(100, 4);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(23, 23);
+            this.button1.TabIndex = 13;
+            this.button1.Text = "M";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // SgbdMultiBaseDatos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.BttActualizar);
             this.Controls.Add(this.BttDesconexion);
             this.Controls.Add(this.comboBoxBD);
@@ -131,5 +144,6 @@
         private System.Windows.Forms.ComboBox comboBoxBD;
         private System.Windows.Forms.Button BttDesconexion;
         private System.Windows.Forms.Button BttActualizar;
+        private System.Windows.Forms.Button button1;
     }
 }
